@@ -274,3 +274,29 @@ def common_superlattice(basis_np,u_np, p=False):
     return conv_sp2np(new_basis)
 
 
+
+def reduce_spanning_set(old_vecs, new_vec):
+    """
+    Takes in 3 dim vectors encoded as numpy integer vectors in list old_vecs
+    and a 3 dim integer vector as numpy integer vector new_vec.
+    
+    Outputs a minimal set of spanning vectors of the lattice given by old_vecs and new_vec
+    as columns in numpy matrix. 
+    """
+    l = len(old_vecs)
+    
+    span_set = []
+    
+    if l==0:
+        # case 1: old_vecs = []
+        span_set = new_vec
+    
+    elif l==1:
+        # case 2: old_vecs = [vec1]
+        # if vec1 and new_vec are collinear, take gcd
+        # else take both
+        
+    elif l==2:
+        # case 3: old_vecs = [vec1, vec2]
+        # if new_vec lies in span of 
+    # case 4: old_vecs = [vec1, vec2, vec3]
