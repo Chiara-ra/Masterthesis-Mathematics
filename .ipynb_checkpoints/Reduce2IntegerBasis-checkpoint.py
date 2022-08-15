@@ -216,7 +216,7 @@ def conv_sp2np(basis):
 
 
 
-def common_superlattice(basis_np,u_np, p=False):
+def common_superlattice_3d(basis_np,u_np, p=False):
     """
     Takes a 3x3 numpy matrix containing an integer basis,
     as well as an additional numpy vector u.
@@ -224,7 +224,8 @@ def common_superlattice(basis_np,u_np, p=False):
     by basis and u as 3x3 numpy matrix. 
     """
     
-    basis, u = conv_np2sp(basis_np, u_np)
+    basis = conv_np2sp(basis_np)
+    u = conv_np2sp(u_np)
     
     # caculate primitive of u in superlattice
     v, coeff, u_coeff = L31_parallel_vectors(basis,u)
@@ -272,22 +273,187 @@ def common_superlattice(basis_np,u_np, p=False):
         sp.pprint(u)
     
     return conv_sp2np(new_basis)
+    
+    
+    
+    
+def common_superlattice_2d(basis_np,u_np, p=False):
+    """
+    Takes a 2x2 or 3x2 numpy matrix containing an integer spanning set,
+    as well as an additional numpy vector u.
+    Calculates integer basis of the superlattice spanned
+    by basis and u as 2x2 or 3x2 numpy matrix. 
+    """
+    dim = len(u_np)
+    
+    basis = conv_np2sp(basis_np)
+    u = conv_np2sp(u_np)
+    
+    if dim == 3:
+        # skip one coordinate
+        ind     = np.argmax(np.abs(basis[:,0].cross(basis[:,1])))
+        vec1 = skip_coord(basis[:,0],ind)
+        vec2 = skip_coord(basis[:,1],ind)
+
+        u = skip_coord(new_vec,ind)
+        basis = sp.Matrix([vec1.T,vec2.T]).T
+        
+    
+    v, coeff, coeff_u = L31_parallel_vectors(basis, u)
+
+    # project basis to v_orth
+    Pbasis = proj_basis(basis,v)
+
+    # calculate gcd of projected vectors
+    x,y = gcd_of_2dvecs(Pbasis)
+
+    # calculate new minimal spanning set
+    new_vec1 = basis_np[:,0]*x + basis_np[:,1]*y
+    new_vec2 = coeff[0]*basis_np[:,0] + coeff[1]*basis_np[:,1] + coeff_u*u_np
+
+    span_set = np.transpose(np.array([new_vec1, new_vec2]))
+    
+    return span_set
+    
+    
 
 
 
-def reduce_spanning_set(old_vecs, new_vec):
+
+
+def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
     """
     Takes in 3 dim vectors encoded as numpy integer vectors in list old_vecs
     and a 3 dim integer vector as numpy integer vector new_vec.
     
-    Outputs a minimal set of spanning vectors of the lattice given by old_vecs and new_vec
+    Outputs a minimal set of spanning vectors of the lattice
     as columns in numpy matrix. 
     """
-    span_set = []
-    # case 1: old_vecs = []
-    span_set = new_vec
     
-    # case 2: old_vecs = [vec1]
-    # if vec1 and new_vec are collinear
-    # case 3: old_vecs = [vec1, vec2]
-    # case 4: old_vecs = [vec1, vec2, vec3]
+    l = len(old_vecs)
+    old_vecs_mx = np.transpose(np.array(old_vecs))
+    all_vecs_mx = np.transpose(np.array(old_vecs+[new_vec]))
+    span_set = []
+    
+    if l==0:
+        if p:
+            print("case 1: old_vecs = []")
+            
+        span_set = new_vec
+    
+    elif l==1:
+        if p:
+            print("case 2: old_vecs = [vec1]")
+        vec1 = old_vecs[0]
+        
+        
+        if abs(la.norm(np.cross(vec1,new_vec))) < 0.1:
+            if p:
+                print("vec1 and new_vec are collinear")
+            # if vec1 and new_vec are collinear, take gcd
+            ind = np.argmax(np.abs(vec1))
+            a = vec1[ind]
+            b = new_vec[ind]
+            gcd_ab, x, y = gcdExtended(a, b)
+            span_set = x*vec1 + y*new_vec
+    
+        
+        else:
+            # else take [vec1, new_vec]
+            if p:
+                print("vec1 and new_vec are linearly independant")
+            span_set = all_vecs_mx
+        
+    elif l==2:
+        if p:
+            print("case 3: old_vecs = [vec1, vec2]")
+        vec1 = old_vecs[0]
+        vec2 = old_vecs[1]
+        if abs(la.det(all_vecs_mx)) < 0.1:
+            if p:
+                print("new_vec lies in real span of vec1 and vec2")
+            # if new_vec lies in span of {vec1, vec2}, use lemma
+            span_set = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
+            
+        
+        else:
+            if p:
+                print("vec1, vec2 and new_vec are linearly independant")
+            # else take [vec1, vec2, new_vec]
+            span_set = all_vecs_mx
+        
+    elif l==3:
+        if p:
+            print("case 4: old_vecs = [vec1, vec2, vec3]")
+        # use common_superlattice()
+        span_set = common_superlattice_3d(old_vecs_mx,new_vec,p=p)
+        
+    else: 
+        # this should not happen
+        # INSERT REAL ERROR
+        print("old_vecs contains too many vectors")
+        
+    return span_set
+
+
+
+
+
+
+def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
+    """
+    Takes in 2 dim vectors encoded as numpy integer vectors in list old_vecs
+    and a 2 dim integer vector as numpy integer vector new_vec.
+    
+    Outputs a minimal set of spanning vectors of the lattice 
+    as columns in numpy matrix. 
+    """
+    
+    l = len(old_vecs)
+    old_vecs_mx = np.transpose(np.array(old_vecs))
+    all_vecs_mx = np.transpose(np.array(old_vecs+[new_vec]))
+    
+    if l==0:
+        if p:
+            print("case 1: old_vecs = []")
+            
+        span_set = new_vec
+    
+    elif l==1:
+        if p:
+            print("case 2: old_vecs = [vec1]")
+        vec1 = old_vecs[0]
+        
+        
+        if abs(la.det(all_vecs_mx)) < 0.1:
+            if p:
+                print("vec1 and new_vec are collinear")
+            # if vec1 and new_vec are collinear, take gcd
+            ind = np.argmax(np.abs(vec1))
+            a = vec1[ind]
+            b = new_vec[ind]
+            gcd_ab, x, y = gcdExtended(a, b)
+            span_set = x*vec1 + y*new_vec
+    
+        
+        else:
+            # else take [vec1, new_vec]
+            if p:
+                print("vec1 and new_vec are linearly independant")
+            span_set = all_vecs_mx
+        
+    elif l==2:
+        if p:
+            print("case 3: old_vecs = [vec1, vec2]")
+        vec1 = old_vecs[0]
+        vec2 = old_vecs[1]
+        # use lemma
+        span_set = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
+            
+    
+    else: 
+        # this should not happen
+        # INSERT REAL ERROR
+        print("old_vecs contains too many vectors")
+        
+    return span_set
