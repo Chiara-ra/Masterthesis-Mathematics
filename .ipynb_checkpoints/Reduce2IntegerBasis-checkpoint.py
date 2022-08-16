@@ -177,7 +177,7 @@ def proj2induct_2d(Pv,u):
     return basis_2d, u_2d, true_i, v_2d, prim_coeff
     
 
-    def nonzero_entry(vec):
+def nonzero_entry(vec):
     for i in range(len(vec)):
         if vec[i]!=0:
             break
@@ -208,11 +208,11 @@ def gcd_of_2dvecs(vec_mx):
 
 
 
-def conv_np2sp(basis,u):
-    return sp.Matrix(basis), sp.Matrix(u)
+def conv_np2sp(array):
+    return sp.Matrix(array)
 
-def conv_sp2np(basis):
-    return np.array(basis).astype(np.float64)
+def conv_sp2np(matrix):
+    return np.array(matrix).astype(np.int32)
 
 
 
@@ -291,14 +291,14 @@ def common_superlattice_2d(basis_np,u_np, p=False):
     
     if dim == 3:
         # skip one coordinate
-        ind     = np.argmax(np.abs(basis[:,0].cross(basis[:,1])))
+        ind  = np.argmax(np.abs(basis[:,0].cross(basis[:,1])))
         vec1 = skip_coord(basis[:,0],ind)
         vec2 = skip_coord(basis[:,1],ind)
 
-        u = skip_coord(new_vec,ind)
+        u = skip_coord(u,ind)
         basis = sp.Matrix([vec1.T,vec2.T]).T
         
-    
+    print(u)
     v, coeff, coeff_u = L31_parallel_vectors(basis, u)
 
     # project basis to v_orth
@@ -362,7 +362,8 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
             # else take [vec1, new_vec]
             if p:
                 print("vec1 and new_vec are linearly independant")
-            span_set.append(vec1).append(new_vec)
+            span_set.append(vec1)
+            span_set.append(new_vec)
         
     elif l==2:
         if p:
@@ -374,7 +375,8 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
                 print("new_vec lies in real span of vec1 and vec2")
             # if new_vec lies in span of {vec1, vec2}, use lemma
             span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
-            span_set.append(span_set_mx[:,0]).append(span_set_mx[:,1])
+            span_set.append(span_set_mx[:,0])
+            span_set.append(span_set_mx[:,1])
             
         
         else:
@@ -388,7 +390,9 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
             print("case 4: old_vecs = [vec1, vec2, vec3]")
         # use common_superlattice()
         span_set_mx = common_superlattice_3d(old_vecs_mx,new_vec,p=p)
-        span_set.append(span_set_mx[:,0]).append(span_set_mx[:,1])append(span_set_mx[:,2])
+        span_set.append(span_set_mx[:,0])
+        span_set.append(span_set_mx[:,1])
+        span_set.append(span_set_mx[:,2])
         
     else: 
         # this should not happen
@@ -414,6 +418,7 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
     l = len(old_vecs)
     old_vecs_mx = np.transpose(np.array(old_vecs))
     all_vecs_mx = np.transpose(np.array(old_vecs+[new_vec]))
+    span_set = []
     
     if l==0:
         if p:
@@ -442,7 +447,9 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
             # else take [vec1, new_vec]
             if p:
                 print("vec1 and new_vec are linearly independant")
-            span_set.append(vec1).append(new_vec)
+                
+            span_set.append(vec1)
+            span_set.append(new_vec)
         
     elif l==2:
         if p:
@@ -451,7 +458,8 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
         vec2 = old_vecs[1]
         # use lemma
         span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
-        span_set.append(span_set_mx[:,0]).append(span_set_mx[:,1])
+        span_set.append(span_set_mx[:,0])
+        span_set.append(span_set_mx[:,1])
             
     
     else: 
