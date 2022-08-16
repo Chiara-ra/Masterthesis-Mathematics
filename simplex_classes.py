@@ -98,6 +98,12 @@ class Simplex2D(Simplex):
         super().__init__(vertices, int_filt, cont_filt)
         # boundary is a list of 3 objects of the class Simplex1D
         self.boundary = boundary
+        
+"""
+!!!!
+Still need Simplex3D
+!!!!
+"""
 
 class Persistence_Pair:
     def __init__(self, dimension, interval_int, interval_cont, rep_simplices):

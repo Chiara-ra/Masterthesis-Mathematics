@@ -327,7 +327,7 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
     and a 3 dim integer vector as numpy integer vector new_vec.
     
     Outputs a minimal set of spanning vectors of the lattice
-    as columns in numpy matrix. 
+    as numpy integer vectors in list span_set. 
     """
     
     l = len(old_vecs)
@@ -339,7 +339,7 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
         if p:
             print("case 1: old_vecs = []")
             
-        span_set = new_vec
+        span_set.append(new_vec
     
     elif l==1:
         if p:
@@ -406,7 +406,7 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
     and a 2 dim integer vector as numpy integer vector new_vec.
     
     Outputs a minimal set of spanning vectors of the lattice 
-    as columns in numpy matrix. 
+    as numpy integer vectors in list span_set. 
     """
     
     l = len(old_vecs)
