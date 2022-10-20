@@ -18,11 +18,12 @@ import numpy as np
 class Simplex:
     def __init__(self, vertices, int_filt, cont_filt):
         self.verts     = vertices
-        self.int_filt  = int_filt
-        self.cont_filt = cont_filt
+        self.index_total = int_filt # used to be int_filt
+        self.index_dim   = int_filt
+        self.time = cont_filt # used to be cont_filt
 
     def update_int_filt(self, new_val):
-        self.int_filt = new_val
+        self.index_total = new_val
 
         
         
@@ -36,7 +37,7 @@ class Simplex0D(Simplex):
         self.xcoord    = self.coords[0]
         self.ycoord    = self.coords[1]
         
-        #  self.cc is List of 0-simplices in form of int_filt values
+        # self.cc is List of 0-simplices in form of int_filt values
         # Make .cc a method, not something that is initialised right at the beginning
 
 
@@ -47,32 +48,30 @@ class Simplex0D(Simplex):
 
 
         if timestep in range(index):
-            #print("Case1")
-            concom = None
+            con_comp = None
         elif timestep in range(index,len(S[0])):
-            #print("Case2")
-            concom = index
+            con_comp = index
         elif timestep in range(len(S[0]),f_len): # most interesting case
-            #print("Case3")
-            concom = self.cc[timestep-1]
+            con_comp = self.cc[timestep-1]
             for i in range(len(S[1])):
                 edge = None
-                if ((S[1])[i]).int_filt == timestep: # at timestep we add a 1-simplex, creating the posibility of a merger
-                    #print("Case3.1")
-                # the 1-simplex has two vertices
-                # first we calculate the new cc of these two vertices
-                # then we look at the old cc's and at the cc of self
-                # if our cc mages the old cc's, then it also gets updated
+                if ((S[1])[i]).int_filt == timestep: 
+                    # at timestep we add a 1-simplex, creating the posibility of a merger
+                    
+                    # the 1-simplex has two vertices
+                    # first we calculate the new cc of these two vertices
+                    # then we look at the old cc's and at the cc of self
+                    # if our cc mages the old cc's, then it also gets updated
                     timestep_S0_S1 = i + len(S[0])
                     edge = (S[1])[i]
                     old_cc_0 = edge.vert0.cc[timestep-1]
                     old_cc_1 = edge.vert1.cc[timestep-1]
-                    new_concom = min(old_cc_0,old_cc_1)
+                    new_con_comp = min(old_cc_0,old_cc_1)
                     if self.cc[timestep-1] in [old_cc_0,old_cc_1]:
-                        #print("new merger:",edge.verts)
-                        concom = new_concom
+                        # new merger:
+                        con_comp = new_con_comp
                     else:
-                        #print("no new merger")
+                        # no new merger
                         break
                 elif ((S[1])[i]).int_filt > timestep: # no 1-simplex is added
                     #print("Case3.2")
@@ -87,7 +86,7 @@ class Simplex0D(Simplex):
             #print("Case5")
             raise ValueError("timestep is not valid.")
 
-        self.cc[timestep] = concom
+        self.cc[timestep] = con_comp
         if len(self.cc) > f_len:
             self.cc = self.cc[:f_len]
 
@@ -103,14 +102,18 @@ class Simplex1D(Simplex):
 class Simplex2D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, ordered_vertices, boundary):
         super().__init__(vertices, int_filt, cont_filt)
-        # boundary is a list of 3 objects of the class Simplex1D
-        self.boundary = boundary
+        self.ord_verts = ordered_vertices
+        self.boundary = boundary # boundary is a list of 3 objects of the class Simplex1D
         
-"""
-!!!!
-Still need Simplex3D
-!!!!
-"""
+        
+        
+class Simplex3D(Simplex):
+    def __init__(self, vertices, int_filt, cont_filt, ordered_vertices, boundary):
+        super().__init__(vertices, int_filt, cont_filt)
+        self.ord_verts = ordered_vertices
+        self.boundary = boundary # boundary is a list of 4 objects of the class Simplex2D       
+        
+
 
 class Persistence_Pair:
     def __init__(self, dimension, interval_int, interval_cont, rep_simplices):
