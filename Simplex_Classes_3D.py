@@ -1,4 +1,6 @@
 # As a note for future versions:
+#!!!!!
+#!!!!!
 # It would probably make a lot of sense to add the attributes .index_all and .index_dim to any given simplex.
 # So a given simplex would have its int_filt, which tells us its place in the filtration.
 # It would also have index_all, which tells us its place in the list of all simplices,
