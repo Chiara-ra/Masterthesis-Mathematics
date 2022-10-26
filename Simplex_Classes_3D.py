@@ -20,7 +20,7 @@ class Simplex:
         self.verts     = vertices
         self.index_total = int_filt # used to be int_filt
         self.index_dim   = int_filt
-        self.time = cont_filt # used to be cont_filt
+        self.index_cont = cont_filt # used to be cont_filt
 
     def update_index_total(self, new_val):
         self.index_total = new_val
