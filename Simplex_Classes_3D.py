@@ -42,55 +42,59 @@ class Simplex0D(Simplex):
 
 
     def calc_cc(self, S, timestep):
-        index = self.int_filt
-        f_len = sum([len(S[i]) for i in range(4)])
-        # find out if new 1-simplex has been added at this timestep
-        """
-        can we simplify this so that we only look at the death-times of cc's, not at all timesteps
-        """
+        
+        for timestep in range(N):
+            for v in S[0]:
+                v.calc_cc(S, timestep)
+            index = self.int_filt
+            f_len = sum([len(S[i]) for i in range(4)])
+            # find out if new 1-simplex has been added at this timestep
+            """
+            can we simplify this so that we only look at the death-times of cc's, not at all timesteps
+            """
 
-        if timestep in range(index):
-            con_comp = None
-        elif timestep in range(index,len(S[0])):
-            con_comp = index
-        elif timestep in range(len(S[0]),f_len): # most interesting case
-            con_comp = self.cc[timestep-1]
-            for i in range(len(S[1])):
-                edge = None
-                if ((S[1])[i]).int_filt == timestep: 
-                    # at timestep we add a 1-simplex, creating the posibility of a merger
-                    
-                    # the 1-simplex has two vertices
-                    # first we calculate the new cc of these two vertices
-                    # then we look at the old cc's and at the cc of self
-                    # if our cc mages the old cc's, then it also gets updated
-                    timestep_S0_S1 = i + len(S[0])
-                    edge = (S[1])[i]
-                    old_cc_0 = edge.vert0.cc[timestep-1]
-                    old_cc_1 = edge.vert1.cc[timestep-1]
-                    new_con_comp = min(old_cc_0,old_cc_1)
-                    if self.cc[timestep-1] in [old_cc_0,old_cc_1]:
-                        # new merger:
-                        con_comp = new_con_comp
-                    else:
-                        # no new merger
+            if timestep in range(index):
+                con_comp = None
+            elif timestep in range(index,len(S[0])):
+                con_comp = index
+            elif timestep in range(len(S[0]),f_len): # most interesting case
+                con_comp = self.cc[timestep-1]
+                for i in range(len(S[1])):
+                    edge = None
+                    if ((S[1])[i]).int_filt == timestep: 
+                        # at timestep we add a 1-simplex, creating the posibility of a merger
+
+                        # the 1-simplex has two vertices
+                        # first we calculate the new cc of these two vertices
+                        # then we look at the old cc's and at the cc of self
+                        # if our cc mages the old cc's, then it also gets updated
+                        timestep_S0_S1 = i + len(S[0])
+                        edge = (S[1])[i]
+                        old_cc_0 = edge.vert0.cc[timestep-1]
+                        old_cc_1 = edge.vert1.cc[timestep-1]
+                        new_con_comp = min(old_cc_0,old_cc_1)
+                        if self.cc[timestep-1] in [old_cc_0,old_cc_1]:
+                            # new merger:
+                            con_comp = new_con_comp
+                        else:
+                            # no new merger
+                            break
+                    elif ((S[1])[i]).int_filt > timestep: # no 1-simplex is added
+                        #print("Case3.2")
                         break
-                elif ((S[1])[i]).int_filt > timestep: # no 1-simplex is added
-                    #print("Case3.2")
-                    break
 
 
 
-        elif timestep >= f_len:
-            #print("Case4")
-            raise ValueError("timestep exceeds number of filtration steps")
-        else:
-            #print("Case5")
-            raise ValueError("timestep is not valid.")
+            elif timestep >= f_len:
+                #print("Case4")
+                raise ValueError("timestep exceeds number of filtration steps")
+            else:
+                #print("Case5")
+                raise ValueError("timestep is not valid.")
 
-        self.cc[timestep] = con_comp
-        if len(self.cc) > f_len:
-            self.cc = self.cc[:f_len]
+            self.cc[timestep] = con_comp
+            if len(self.cc) > f_len:
+                self.cc = self.cc[:f_len]
 
 class Simplex1D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, crossing_v, ordered_vertices):
