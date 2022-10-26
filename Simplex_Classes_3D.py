@@ -45,7 +45,9 @@ class Simplex0D(Simplex):
         index = self.int_filt
         f_len = sum([len(S[i]) for i in range(4)])
         # find out if new 1-simplex has been added at this timestep
-
+        """
+        can we simplify this so that we only look at the death-times of cc's, not at all timesteps
+        """
 
         if timestep in range(index):
             con_comp = None
