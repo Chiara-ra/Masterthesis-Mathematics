@@ -22,7 +22,7 @@ class Simplex:
         self.index_dim   = int_filt
         self.time = cont_filt # used to be cont_filt
 
-    def update_int_filt(self, new_val):
+    def update_index_total(self, new_val):
         self.index_total = new_val
 
         
