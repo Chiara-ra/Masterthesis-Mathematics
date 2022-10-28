@@ -44,6 +44,13 @@ class Simplex0D(Simplex):
         self.cc = cc_list
         
 
+        """
+        Is it really necessary to have .ordered_vertices?
+        With the names of the vertices (.vertices) we already have all the information we need to extract these 2-simplices ...
+        
+        Also, wouldn't it be more robust if, instead of saving one SimplexnD within the other, to save their .index_dim ?
+        This way we can easily extract this information ...
+        """
 class Simplex1D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, crossing_v, ordered_vertices):
         super().__init__(vertices, int_filt, cont_filt)
