@@ -32,10 +32,7 @@ class Simplex:
 class Simplex0D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, coordinates):
         super().__init__(vertices,int_filt,cont_filt)
-
         self.coords    = coordinates
-        self.xcoord    = self.coords[0]
-        self.ycoord    = self.coords[1]
         
         # self.cc is List of 0-simplices in form of int_filt values
         # Make .cc a method, not something that is initialised right at the beginning
@@ -43,14 +40,20 @@ class Simplex0D(Simplex):
     def create_cc(self, cc_list):
         self.cc = cc_list
         
+    def transf_coord(self, a,b,c):
+        self.coords = [self.coords[0]*a,self.coords[1]*b,self.coords[2]*c]
 
-        """
-        Is it really necessary to have .ordered_vertices?
-        With the names of the vertices (.vertices) we already have all the information we need to extract these 2-simplices ...
         
-        Also, wouldn't it be more robust if, instead of saving one SimplexnD within the other, to save their .index_dim ?
-        This way we can easily extract this information ...
-        """
+        
+        
+# --------------
+"""
+Is it really necessary to have .ordered_vertices?
+With the names of the vertices (.vertices) we already have all the information we need to extract these 2-simplices ...
+
+Also, wouldn't it be more robust if, instead of saving one SimplexnD within the other, to save their .index_dim ?
+This way we can easily extract this information ...
+"""
 class Simplex1D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, crossing_v, ordered_vertices):
         super().__init__(vertices, int_filt, cont_filt)
@@ -59,6 +62,11 @@ class Simplex1D(Simplex):
         self.ord_verts = ordered_vertices # list of Simplex0D elements
         self.vert0 = ordered_vertices[0]  # Simplex0D
         self.vert1 = ordered_vertices[1]  # Simplex0D
+        
+        
+        
+# --------------
+
 
 class Simplex2D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, ordered_vertices, boundary):
@@ -68,6 +76,10 @@ class Simplex2D(Simplex):
         
         
         
+        
+# --------------
+
+
 class Simplex3D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, ordered_vertices, boundary):
         super().__init__(vertices, int_filt, cont_filt)
@@ -75,6 +87,7 @@ class Simplex3D(Simplex):
         self.boundary = boundary # boundary is a list of 4 objects of the class Simplex2D       
         
 
+# --------------
 
 class Persistence_Pair:
     def __init__(self, dimension, interval_int, interval_cont, rep_simplices):
