@@ -109,7 +109,7 @@ class Persistence_Pair:
         self.cc = cc
 
     def return_cv(self, timestep):
-        V = np.array([0,0],dtype=np.int32)
+        V = np.zeros(3,dtype=np.int32)
         a = self.start_int
 
         if timestep >= a:

@@ -312,7 +312,7 @@ def common_superlattice_2d(basis_np,u_np, p=False):
 
     span_set = np.transpose(np.array([new_vec1, new_vec2]))
     
-    return span_set
+    return span_set.astype(np.int32)
     
     
 
@@ -372,17 +372,19 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
         if abs(la.det(all_vecs_mx)) < 0.1:
             if p:
                 print("new_vec lies in real span of vec1 and vec2")
+                
             # if new_vec lies in span of {vec1, vec2}, use lemma
             span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
             span_set.append(span_set_mx[:,0])
             span_set.append(span_set_mx[:,1])
-            
         
         else:
             if p:
                 print("vec1, vec2 and new_vec are linearly independant")
             # else take [vec1, vec2, new_vec]
-            span_set.append(vec1,vec2,new_vec)
+            span_set.append(vec1)
+            span_set.append(vec2)
+            span_set.append(new_vec)
         
     elif l==3:
         if p:
