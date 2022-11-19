@@ -51,12 +51,21 @@ beta  =  p*theta
 
 import numpy as np
 
+dim = 3
 p = 2
 q = 3
-spacing = np.linspace(0,1,100)
+res = 100
+
+
+spacing = np.linspace(0,1,res)
 x = np.mod(- q*spacing, 1)
 y = np.mod(  p*spacing, 1)
 
-
-a = numpy.array(x,y)
-np.savetxt(f"torus_knot_2d_p{p}_q{q}.csv", a, delimiter=",")
+if dim == 2:
+    a = np.array([x,y]).transpose()
+    
+elif dim == 3:
+    z = np.array([1/2 for dummy in range(res)])
+    a = np.array([x,y,z]).transpose()
+    
+np.savetxt(f"torus_knot_{dim}d_p{p}_q{q}.csv", a, delimiter=",")
