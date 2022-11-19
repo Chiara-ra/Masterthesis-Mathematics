@@ -57,7 +57,7 @@ q = 3
 res = 100
 
 
-spacing = np.linspace(0,1,res)
+spacing = np.linspace(0,1,res,endpoint=False)
 x = np.mod(- q*spacing, 1)
 y = np.mod(  p*spacing, 1)
 
