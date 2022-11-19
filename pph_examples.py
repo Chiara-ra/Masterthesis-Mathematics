@@ -12,7 +12,7 @@ def torus_knot(p: int, q: int, dim: int, res = 20):
     """
                
     if (type(dim) != int) or (dim not in [2,3]):
-        raise ValueError("dim needs to be integer 2 or 3, but is not.")
+        raise ValueError(f"dim needs to be integer 2 or 3, but is {dim}.")
     else:
         spacing = np.linspace(0,1,res,endpoint=False)
         x = np.mod(- q*spacing, 1)
