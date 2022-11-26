@@ -17,10 +17,11 @@ import numpy as np
 
 class Simplex:
     def __init__(self, vertices, int_filt, cont_filt):
-        self.verts     = vertices
-        self.index_total = int_filt # used to be int_filt
-        self.index_dim   = int_filt
-        self.index_cont = cont_filt # used to be cont_filt
+        self.verts = vertices
+        self.index_total = int_filt 
+        self.index_dim = int_filt
+        self.index_cont = cont_filt 
+        self.dim = len(self.verts)-1
 
     def update_index_total(self, new_val):
         self.index_total = new_val
@@ -31,7 +32,7 @@ class Simplex:
         
 class Simplex0D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, coordinates):
-        super().__init__(vertices,int_filt,cont_filt)
+        super().__init__(vertices, int_filt, cont_filt)
         self.coords    = coordinates
         
         # self.cc is List of 0-simplices in form of int_filt values
@@ -90,20 +91,23 @@ class Simplex3D(Simplex):
 # --------------
 
 class Persistence_Pair:
-    def __init__(self, dimension, interval_int, interval_cont, rep_simplices):
+    def __init__(self, dimension, interval_int):
         self.dim        = dimension
-        self.pair_int   = interval_int # life span of class in integer steps
-        self.start_int  = interval_int[0]
-        self.end_int    = interval_int[1]
-        self.pair_cont  = interval_cont # life span of class in real time
-        self.start_cont = interval_cont[0]
-        self.end_cont   = interval_cont[1]
-        self.reps       = rep_simplices # list of Simplex-objects whose sum gives representative
+        self.lifespan_int   = interval_int # life span of class in integer steps
+        
+        self.lifespan_cont  = None
+        self.rep        = None # list of Simplex-objects whose sum gives representative
         self.cc         = None # we first have to call self.calc_cc
         #self.cv         = None # we first have to call self.calc_cc
-
+    
+    def set_continuous(self, interval_cont):
+        self.lifespan_cont  = interval_cont # life span of class in real time
+        
+    def set_representative(self, rep):
+        self.rep = rep
+        
     def calc_cc(self): # right now this only works for 1-dim pps. Generalise this for 0 to 3. 
-        first_rep = self.reps[0]
+        first_rep = self.rep[0]
         first_vert = first_rep.vert0
         cc = first_vert.cc
         self.cc = cc
@@ -113,10 +117,10 @@ class Persistence_Pair:
         a = self.start_int
 
         if timestep >= a:
-            edge = self.reps[0] # class Simplex1D
+            edge = self.rep[0] # class Simplex1D
             V += edge.cv      # add crossing vector of edge to V
             end_vert = edge.vert1
-            pp_red = self.reps[1:]
+            pp_red = self.rep[1:]
 
             while len(pp_red) != 0:
                 # look for correct representative that has end_vert as one of its vertices
@@ -147,3 +151,6 @@ class Persistence_Pair:
             raise ValueError("Timestep is earlier than birth of cycle.")
 
         return V
+    
+    
+    
