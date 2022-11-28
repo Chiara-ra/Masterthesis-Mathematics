@@ -100,12 +100,55 @@ class Persistence_Pair:
         self.cc         = None # we first have to call self.calc_cc
         #self.cv         = None # we first have to call self.calc_cc
     
-    def set_continuous(self, interval_cont):
-        self.lifespan_cont  = interval_cont # life span of class in real time
+
+    def int2cont_interval(self, torus_filtration):
+        birth = self.lifespan_int[0]
+        death = self.lifespan_int[1]
+        a_cont = torus_filtration[birth][1]
+
+        if death != float("inf"):
+            b_cont = torus_filtration[death][1]
+        else:
+            b_cont = float("inf")
+        self.lifespan_cont  = (a_cont, b_cont)
         
-    def set_representative(self, rep):
+        
+        
+    def calc_birth_rep(self, V, simplex_objects):
+    
+        # The j-th column of V encodes the columns in ∂ 
+        # that add up to give the j-th column in R. 
+
+        j = self.find_representative_column(simplex_objects)
+        self.collect_simplices_from_column(V[:,j], simplex_objects)
+ 
+
+    def find_representative_column(self, simplex_objects):
+        # this for-loop searches for the simplex in simplex_objects 
+        # that triggers the birth of the given peristence pair
+        for simp in simplex_objects[self.dim]:
+            if simp.index_total == self.lifespan_int[0]:
+                # index within the dimension + size of previous dimensions = total index in V
+                j = simplex_objects[self.dim].index(simp) + sum([len(simplex_objects[k]) for k in range(self.dim)])
+                break
+        return j
+
+    
+    
+    def collect_simplices_from_column(self, jcolumn, simplex_objects):
+        # We want to take the birth representative,
+        # meaning we look at the column of the cycle being born
+
+        rep = []
+        simplex_objects_flat =  [simp for sublist in simplex_objects for simp in sublist]
+
+        for i in range(len(simplex_objects_flat)): 
+            if jcolumn[i] == 1: 
+                simp = simplex_objects_flat[i]
+                rep.append(simp)
         self.rep = rep
-        
+    
+    
     def calc_cc(self): # right now this only works for 1-dim pps. Generalise this for 0 to 3. 
         first_rep = self.rep[0]
         first_vert = first_rep.vert0
