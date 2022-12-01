@@ -157,7 +157,7 @@ class Persistence_Pair:
 
     def return_cv(self, timestep):
         V = np.zeros(3,dtype=np.int32)
-        a = self.start_int
+        a = self.lifespan_int[0]
 
         if timestep >= a:
             edge = self.rep[0] # class Simplex1D

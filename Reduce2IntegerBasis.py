@@ -329,6 +329,14 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
     as numpy integer vectors in list span_set. 
     """
     
+    """
+    ! ! !
+    At this point, our spanning set often gets updated, 
+    even though we have just chosen a different representation of the vectors.
+    Check that this does not happen (unnecessary work and confusion later on if change has happened)
+    
+    """
+    
     l = len(old_vecs)
     old_vecs_mx = np.transpose(np.array(old_vecs))
     all_vecs_mx = np.transpose(np.array(old_vecs+[new_vec]))
