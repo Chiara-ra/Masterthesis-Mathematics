@@ -35,11 +35,11 @@ class Simplex0D(Simplex):
         super().__init__(vertices, int_filt, cont_filt)
         self.coords    = coordinates
         
-        # self.cc is List of 0-simplices in form of int_filt values
-        # Make .cc a method, not something that is initialised right at the beginning
+        # self.component is List of 0-simplices in form of int_filt values
+        # Make .component a method, not something that is initialised right at the beginning
 
     def create_cc(self, cc_list):
-        self.cc = cc_list
+        self.component = cc_list
         
     def transf_coord(self, a,b,c):
         self.coords = [self.coords[0]*a,self.coords[1]*b,self.coords[2]*c]
@@ -97,7 +97,7 @@ class Persistence_Pair:
         
         self.lifespan_cont  = None
         self.rep        = None # list of Simplex-objects whose sum gives representative
-        self.cc         = None # we first have to call self.calc_cc
+        self.component         = None # we first have to call self.calc_cc
         #self.cv         = None # we first have to call self.calc_cc
     
 
@@ -115,12 +115,15 @@ class Persistence_Pair:
         
         
     def calc_birth_rep(self, V, simplex_objects):
-    
-        # The j-th column of V encodes the columns in ∂ 
-        # that add up to give the j-th column in R. 
+        if self.dim == 0:
+            self.rep = [simplex_objects[0][self.lifespan_int[0]]]
+        
+        elif self.dim == 1:
+            # The j-th column of V encodes the columns in ∂ 
+            # that add up to give the j-th column in R. 
 
-        j = self.find_representative_column(simplex_objects)
-        self.collect_simplices_from_column(V[:,j], simplex_objects)
+            j = self.find_representative_column(simplex_objects)
+            self.collect_simplices_from_column(V[:,j], simplex_objects)
  
 
     def find_representative_column(self, simplex_objects):
@@ -150,10 +153,13 @@ class Persistence_Pair:
     
     
     def calc_cc(self): # right now this only works for 1-dim pps. Generalise this for 0 to 3. 
-        first_rep = self.rep[0]
-        first_vert = first_rep.vert0
-        cc = first_vert.cc
-        self.cc = cc
+        if self.dim == 0:
+            self.component = self.rep[0].component
+            
+        elif self.dim == 1:
+            first_rep = self.rep[0]
+            first_vert = first_rep.vert0
+            self.component = first_vert.component
 
     def return_cv(self, timestep):
         V = np.zeros(3,dtype=np.int32)
