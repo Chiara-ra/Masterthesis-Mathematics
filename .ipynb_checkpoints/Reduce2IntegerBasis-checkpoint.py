@@ -294,18 +294,17 @@ def common_superlattice_2d(basis_np,u_np, p=False):
         ind  = np.argmax(np.abs(basis[:,0].cross(basis[:,1])))
         vec1 = skip_coord(basis[:,0],ind)
         vec2 = skip_coord(basis[:,1],ind)
-
         u = skip_coord(u,ind)
         basis = sp.Matrix([vec1.T,vec2.T]).T
         
     v, coeff, coeff_u = L31_parallel_vectors(basis, u)
-
+    
     # project basis to v_orth
     Pbasis = proj_basis(basis,v)
+    
 
     # calculate gcd of projected vectors
     x,y = gcd_of_2dvecs(Pbasis)
-
     # calculate new minimal spanning set
     new_vec1 = basis_np[:,0]*x + basis_np[:,1]*y
     new_vec2 = coeff[0]*basis_np[:,0] + coeff[1]*basis_np[:,1] + coeff_u*u_np
@@ -380,11 +379,23 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
         if abs(la.det(all_vecs_mx)) < 0.1:
             if p:
                 print("new_vec lies in real span of vec1 and vec2")
-                
-            # if new_vec lies in span of {vec1, vec2}, use lemma
-            span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
-            span_set.append(span_set_mx[:,0])
-            span_set.append(span_set_mx[:,1])
+            
+            from sympy.abc import a, b
+            coeffs = sp.solvers.solvers.solve(vec1*a+vec2*b-new_vec,a,b)
+            is_int_comb = False
+            for key,value in coeffs.items():
+                try:
+                    if value.q == 1:
+                        is_int_comb = True
+                except:
+                    pass
+            if is_int_comb:
+                span_set = old_vecs
+            else:
+                # if new_vec lies in span of {vec1, vec2}, use lemma
+                span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
+                span_set.append(span_set_mx[:,0])
+                span_set.append(span_set_mx[:,1])
         
         else:
             if p:

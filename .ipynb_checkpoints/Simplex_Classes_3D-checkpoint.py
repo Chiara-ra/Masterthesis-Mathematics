@@ -34,6 +34,7 @@ class Simplex0D(Simplex):
     def __init__(self, vertices, int_filt, cont_filt, coordinates):
         super().__init__(vertices, int_filt, cont_filt)
         self.coords    = coordinates
+        self.component = None
         
         # self.component is List of 0-simplices in form of int_filt values
         # Make .component a method, not something that is initialised right at the beginning
@@ -96,8 +97,8 @@ class Persistence_Pair:
         self.lifespan_int   = interval_int # life span of class in integer steps
         
         self.lifespan_cont  = None
-        self.rep        = None # list of Simplex-objects whose sum gives representative
-        self.component         = None # we first have to call self.calc_cc
+        self.rep       = None # list of Simplex-objects whose sum gives representative
+        self.component = None # we first have to call self.calc_cc
         #self.cv         = None # we first have to call self.calc_cc
     
 
@@ -161,45 +162,42 @@ class Persistence_Pair:
             first_vert = first_rep.vert0
             self.component = first_vert.component
 
-    def return_cv(self, timestep):
+    def calc_cv(self):
         V = np.zeros(3,dtype=np.int32)
-        a = self.lifespan_int[0]
+        
+        edge = self.rep[0] # Simplex1D object
+        V += edge.cv       # add crossing vector of edge to V
+        end_vert = edge.vert1
+        pp_red = self.rep[1:]
 
-        if timestep >= a:
-            edge = self.rep[0] # class Simplex1D
-            V += edge.cv      # add crossing vector of edge to V
-            end_vert = edge.vert1
-            pp_red = self.rep[1:]
+        while len(pp_red) != 0:
+            # look for correct representative that has end_vert as one of its vertices
+            for i in range(len(pp_red)):
+                edge = pp_red[i]
 
-            while len(pp_red) != 0:
-                # look for correct representative that has end_vert as one of its vertices
-                for i in range(len(pp_red)):
-                    edge = pp_red[i]
+                # check if we are looking at the correct edge
+                if end_vert in edge.ord_verts:
+                    # check if orientations are lining up or not
+                    if end_vert == edge.ord_verts[0]:
+                        ori = +1
+                        end_vert = edge.vert1
+                    else:
+                        ori = -1
+                        end_vert = edge.vert0
 
-                    # check if we are looking at the correct edge
-                    if end_vert in edge.ord_verts:
-                        # check if orientations are lining up or not
-                        if end_vert == edge.ord_verts[0]:
-                            ori = +1
-                            end_vert = edge.vert1
-                        else:
-                            ori = -1
-                            end_vert = edge.vert0
+                    V += ori * edge.cv
+                    pp_red.pop(i)
 
-                        V += ori * pp_red[i].cv
-                        pp_red = pp_red[:i]+pp_red[i+1:]
+                    break # breaks for loop, but while loop continues
 
-                        break # this breaks the for loop, but the while loop continues
-
-                    if i == len(pp_red)-1:
-                        print("Could not find next edge.") # make this real error message
-                        pp_red = []
-                        break
-
-        else:
-            raise ValueError("Timestep is earlier than birth of cycle.")
-
+                if i == len(pp_red)-1:
+                    """
+                    ! ! !
+                    create a real error message here!
+                    """
+                    print("Could not find next edge.") 
+                    pp_red = []
+                    break
         return V
-    
-    
-    
+
+
