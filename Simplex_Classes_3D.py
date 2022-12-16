@@ -159,8 +159,7 @@ class Persistence_Pair:
             
         elif self.dim == 1:
             first_rep = self.rep[0]
-            first_vert = first_rep.vert0
-            self.component = first_vert.component
+            self.component = first_vert = first_rep.vert0.component
 
     def calc_cv(self):
         V = np.zeros(3,dtype=np.int32)

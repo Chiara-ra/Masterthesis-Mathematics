@@ -1,6 +1,8 @@
 # contains plotting for merge trees 
 
 
+
+
 class MergeOrder:
     def __init__(self, data):
         self.data_static = deepcopy(data)
