@@ -32,7 +32,7 @@ def lcm(a, b):
 # ------
 
 
-def L31_parallel_vectors(basis,u):
+def L31_parallel_vectors(basis, u):
     # function that takes basis (which generates sublattice Z) and vector v
     # outputs vector u as linear combination of basis elements, which is parallel to v
     # also outputs or at least explicitely calculates the coefficients involved
@@ -341,7 +341,11 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
     all_vecs_mx = np.transpose(np.array(old_vecs+[new_vec]))
     span_set = []
     
-    if l==0:
+    
+    if abs(la.norm(new_vec)) < 0.9:
+        pass
+    
+    elif l==0:
         if p:
             print("case 1: old_vecs = []")
             
