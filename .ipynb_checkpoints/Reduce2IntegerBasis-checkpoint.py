@@ -343,7 +343,7 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
     
     
     if abs(la.norm(new_vec)) < 0.9:
-        pass
+        span_set = old_vecs
     
     elif l==0:
         if p:
