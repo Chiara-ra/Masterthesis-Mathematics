@@ -11,7 +11,7 @@ def torus_knot(p: int, q: int, dim: int, res = 20):
     or in unit square in R3 embedded at z=.5
     """
                
-    if (type(dim) != int) or (dim not in [2,3]):
+    if (not isinstance(dim, int)) or (dim not in [2,3]):
         raise ValueError(f"dim needs to be integer 2 or 3, but is {dim}.")
     else:
         spacing = np.linspace(0,1,res,endpoint=False)
