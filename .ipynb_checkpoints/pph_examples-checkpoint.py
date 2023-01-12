@@ -94,88 +94,80 @@ def interwoven_grid_211(num_steps=10):
 
 
 
-def interwoven_grid_222(num_steps=10):
+def interwoven_grid_222(step_size = 0.04):
     """
     interwoven 3D grid with index 2*2*2
     """
     
     
-    x_direction_first_part_x_vals = np.linspace(0, 0.3, num_steps, endpoint = False)
-    x_direction_first_part_y_vals = np.linspace(0,  0.4, num_steps, endpoint = False)
-    x_direction_first_part_z_vals = np.linspace(0,  0, num_steps, endpoint = False)
-
-    x_direction_second_part_x_vals = np.linspace(0.3, 1.2, num_steps, endpoint = False) 
-    x_direction_second_part_y_vals = np.linspace(0.4, 0.2, num_steps, endpoint = False)
-    x_direction_second_part_z_vals = np.linspace(0, 0.4, num_steps, endpoint = False)
-
-    x_direction_third_part_x_vals = np.linspace(1.2,  2,num_steps, endpoint = False)
-    x_direction_third_part_y_vals = np.linspace(0.2,  0, num_steps, endpoint = False)
-    x_direction_third_part_z_vals = np.linspace(0.4,  0, num_steps, endpoint = False)
+    #interwoven 3D grid with index 2*2*2, just one motif, as example point set to input in periodic persistence software:
 
 
-    y_direction_first_part_x_vals = np.linspace(0,  0, num_steps, endpoint = False) 
-    y_direction_first_part_y_vals = np.linspace(0, 0.3, num_steps, endpoint = False) 
-    y_direction_first_part_z_vals = np.linspace(0,  0.4, num_steps, endpoint = False)
+    length_edge_1 = np.sqrt(0.3**2 + 0.4**2)
+    length_edge_2 = np.sqrt(0.9**2 + 0.2**2 + 0.8**2)
+    length_edge_3 = np.sqrt(0.8**2 + 0.4**2 + 0.2**2)
 
-    y_direction_second_part_x_vals = np.linspace(0, 0.4, num_steps, endpoint = False) 
-    y_direction_second_part_y_vals = np.linspace(0.3, 1.2, num_steps, endpoint = False)
-    y_direction_second_part_z_vals = np.linspace(0.4, 0.2, num_steps, endpoint = False)
+    num_points_along_edge_1 = int( np.ceil(length_edge_1 / step_size) + 1 )
+    num_points_along_edge_2 = int( np.ceil(length_edge_2 / step_size) + 1 )
+    num_points_along_edge_3 = int( np.ceil(length_edge_3 / step_size) + 1 )
 
-    y_direction_third_part_x_vals = np.linspace(0.4,  0, num_steps, endpoint = False) 
-    y_direction_third_part_y_vals = np.linspace(1.2,  2, num_steps, endpoint = False) 
-    y_direction_third_part_z_vals = np.linspace(0.2,  0, num_steps, endpoint = False)
+    x_iter=0
+    y_iter=0
+    z_iter=0
+
+    x_direction_first_part_x_vals = np.linspace(x_iter,      x_iter+0.3, num_points_along_edge_1) 
+    x_direction_first_part_y_vals = np.linspace(y_iter,      y_iter+0.4, num_points_along_edge_1)
+    x_direction_first_part_z_vals = np.linspace(z_iter,      z_iter,     num_points_along_edge_1)
+
+    x_direction_second_part_x_vals = np.linspace(x_iter+0.3, x_iter+1.2, num_points_along_edge_2) 
+    x_direction_second_part_y_vals = np.linspace(y_iter+0.4, y_iter+0.6, num_points_along_edge_2)
+    x_direction_second_part_z_vals = np.linspace(z_iter,     z_iter+0.8, num_points_along_edge_2)
+
+    x_direction_third_part_x_vals = np.linspace(x_iter+1.2,  x_iter+2,   num_points_along_edge_3) 
+    x_direction_third_part_y_vals = np.linspace(y_iter+0.6,  y_iter,     num_points_along_edge_3)
+    x_direction_third_part_z_vals = np.linspace(z_iter+0.8,  z_iter,     num_points_along_edge_3)
+
+    ##Now we do the same kind of trick in y- and z-direction as well.
+    ##I.e. Also in y-direction we skip an integer point by connecting (0,0,0) directly with (0,2,0).
+    ##But not with a straight line but with a curved line consisting of 3 pieces instead.
+    ##The curve is the same as before. I just permuted the coordinates.
+    y_direction_first_part_x_vals = np.linspace(x_iter,      x_iter,     num_points_along_edge_1) 
+    y_direction_first_part_y_vals = np.linspace(y_iter,      y_iter+0.3, num_points_along_edge_1) 
+    y_direction_first_part_z_vals = np.linspace(z_iter,      z_iter+0.4, num_points_along_edge_1)
+
+    y_direction_second_part_x_vals = np.linspace(x_iter,     x_iter+0.8, num_points_along_edge_2) 
+    y_direction_second_part_y_vals = np.linspace(y_iter+0.3, y_iter+1.2, num_points_along_edge_2)
+    y_direction_second_part_z_vals = np.linspace(z_iter+0.4, z_iter+0.6, num_points_along_edge_2)
+
+    y_direction_third_part_x_vals = np.linspace(x_iter+0.8,  x_iter,     num_points_along_edge_3) 
+    y_direction_third_part_y_vals = np.linspace(y_iter+1.2,  y_iter+2,   num_points_along_edge_3) 
+    y_direction_third_part_z_vals = np.linspace(z_iter+0.6,  z_iter,     num_points_along_edge_3)
+
+    ##And in z-direction as well:
+    z_direction_first_part_x_vals = np.linspace(x_iter,      x_iter+0.4, num_points_along_edge_1) 
+    z_direction_first_part_y_vals = np.linspace(y_iter,      y_iter,     num_points_along_edge_1)
+    z_direction_first_part_z_vals = np.linspace(z_iter,      z_iter+0.3, num_points_along_edge_1) 
+
+    z_direction_second_part_x_vals = np.linspace(x_iter+0.4, x_iter+0.6, num_points_along_edge_2) 
+    z_direction_second_part_y_vals = np.linspace(y_iter,     y_iter+0.8, num_points_along_edge_2)
+    z_direction_second_part_z_vals = np.linspace(z_iter+0.3, z_iter+1.2, num_points_along_edge_2)
+
+    z_direction_third_part_x_vals = np.linspace(x_iter+0.6,  x_iter,     num_points_along_edge_3) 
+    z_direction_third_part_y_vals = np.linspace(y_iter+0.8,  y_iter,     num_points_along_edge_3)
+    z_direction_third_part_z_vals = np.linspace(z_iter+1.2,  z_iter+2,   num_points_along_edge_3) 
 
 
-    z_direction_first_part_x_vals = np.linspace(0,  0.4, num_steps, endpoint = False) 
-    z_direction_first_part_y_vals = np.linspace(0,  0, num_steps, endpoint = False)
-    z_direction_first_part_z_vals = np.linspace(0, 0.3, num_steps, endpoint = False) 
 
-    z_direction_second_part_x_vals = np.linspace(0.4, 0.2, num_steps, endpoint = False) 
-    z_direction_second_part_y_vals = np.linspace(0, 0.4, num_steps, endpoint = False)
-    z_direction_second_part_z_vals = np.linspace(0.3, 1.2, num_steps, endpoint = False)
-
-    z_direction_third_part_x_vals = np.linspace(0.2,  0, num_steps, endpoint = False) 
-    z_direction_third_part_y_vals = np.linspace(0.4,  0, num_steps, endpoint = False)
-    z_direction_third_part_z_vals = np.linspace(1.2,  2, num_steps, endpoint = False) 
-
-
-
-    x_vals = np.concatenate((x_direction_first_part_x_vals, 
-                             x_direction_second_part_x_vals, 
-                             x_direction_third_part_x_vals, 
-                             y_direction_first_part_x_vals, 
-                             y_direction_second_part_x_vals, 
-                             y_direction_third_part_x_vals, 
-                             z_direction_first_part_x_vals, 
-                             z_direction_second_part_x_vals, 
-                             z_direction_third_part_x_vals))
-    
-    y_vals = np.concatenate((x_direction_first_part_y_vals, 
-                             x_direction_second_part_y_vals, 
-                             x_direction_third_part_y_vals, 
-                             y_direction_first_part_y_vals, 
-                             y_direction_second_part_y_vals, 
-                             y_direction_third_part_y_vals, 
-                             z_direction_first_part_y_vals, 
-                             z_direction_second_part_y_vals, 
-                             z_direction_third_part_y_vals))
-    
-    z_vals = np.concatenate((x_direction_first_part_z_vals, 
-                             x_direction_second_part_z_vals, 
-                             x_direction_third_part_z_vals, 
-                             y_direction_first_part_z_vals, 
-                             y_direction_second_part_z_vals, 
-                             y_direction_third_part_z_vals, 
-                             z_direction_first_part_z_vals, 
-                             z_direction_second_part_z_vals, 
-                             z_direction_third_part_z_vals))
+    x_vals = np.concatenate((x_direction_first_part_x_vals, x_direction_second_part_x_vals, x_direction_third_part_x_vals, y_direction_first_part_x_vals, y_direction_second_part_x_vals, y_direction_third_part_x_vals, z_direction_first_part_x_vals, z_direction_second_part_x_vals, z_direction_third_part_x_vals))
+    y_vals = np.concatenate((x_direction_first_part_y_vals, x_direction_second_part_y_vals, x_direction_third_part_y_vals, y_direction_first_part_y_vals, y_direction_second_part_y_vals, y_direction_third_part_y_vals, z_direction_first_part_y_vals, z_direction_second_part_y_vals, z_direction_third_part_y_vals))
+    z_vals = np.concatenate((x_direction_first_part_z_vals, x_direction_second_part_z_vals, x_direction_third_part_z_vals, y_direction_first_part_z_vals, y_direction_second_part_z_vals, y_direction_third_part_z_vals, z_direction_first_part_z_vals, z_direction_second_part_z_vals, z_direction_third_part_z_vals))
 
 
     #To bring it into one unit cell (the unit cell is the standard 1x1x1 cubic unit cell)
     x_vals = x_vals - np.floor(x_vals)
     y_vals = y_vals - np.floor(y_vals) 
     z_vals = z_vals - np.floor(z_vals)
-
+    
     a = np.array([x_vals,y_vals,z_vals]).transpose()
 
     return a
