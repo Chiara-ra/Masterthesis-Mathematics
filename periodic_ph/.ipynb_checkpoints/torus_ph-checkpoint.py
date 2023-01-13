@@ -1,3 +1,7 @@
+# libraries
+import numpy as np
+
+
 # Calculating torus PH
 
 # After the calculation of the periodic filtration, next comes calculating the periodic persistent homology. The algorithm here should not differ significantly from the standard ones. The only reason we are writing this from scratch is that pre-existing software is not made to handle our data, especialy in case of degenerate simplices. 

@@ -1,3 +1,7 @@
+# libraries
+
+
+
 # Creating Merge Tree
 
 ## MergeOrder class for ordering branches
@@ -162,9 +166,8 @@ def plot_mergetree(data, continuous = None, width=5, height=7):
     ax.set_xlabel("component")
     
     yticks = [0]
-    #yticks += [conditional_int2cont(data[component][-1].time_index, continuous) for component in range(0,N)]
     yticks += [conditional_int2cont(data[component][i].time_index, continuous) 
-               for component in range(0,N) 
+               for component in range(0, N) 
                for i in range(len(data[component]))]
     
     
