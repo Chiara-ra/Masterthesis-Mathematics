@@ -6,6 +6,15 @@ import numpy as np
 
 
 
+def random_points(N=5, a=1, b=1, c=1):
+    """
+    Generates N random points in [0,a]x[0,b]x[0,c] cuboid,
+    outputts Nx3 numpy array, each row containing x, y,z coordinates of a point.
+    """
+    return np.array([[rd.random()*a, rd.random()*b, rd.random()*c] for i in range(N)])
+
+
+
 def torus_knot(p: int, q: int, dim: int, res = 20):
     r""" Outputs array of points sampled from (p,q)-torus knot
     with a resolution of res.
