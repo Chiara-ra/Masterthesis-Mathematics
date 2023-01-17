@@ -4,7 +4,7 @@ import numpy.linalg as la
 import sympy as sp
 
 
-## Auxiliary functions for periodic_filtration()
+## Auxiliary functions for torus_filtration()
 
 
 ### Duplicating points to neighbouring cells
@@ -734,11 +734,11 @@ def preprocess_points(points, a, b, c, eps = 1e-5):
 
 
 
-## The final periodic_filtration()
+## The final torus_filtration()
 
 
    
-def periodic_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
+def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
 
     """
     Input:

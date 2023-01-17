@@ -1,4 +1,6 @@
 # libraries
+import numpy as np
+import torus_alpha_complex as tac
 
 
 
@@ -17,7 +19,7 @@ class ExamplePrint:
         self.int2cont = None
         
     def calculate_pph(self):
-        torus_filtration, simplex_objects = periodic_filtration(self.points,
+        torus_filtration, simplex_objects = tac.torus_filtration(self.points,
                                                       a=self.scale_x,
                                                       b=self.scale_y,
                                                       c=self.scale_z)

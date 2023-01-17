@@ -1,5 +1,6 @@
 # libraries
 import numpy as np
+import random as rd
 
 # This file contains examples for calculating torus persistence /
 # proof of concept PPH computations
