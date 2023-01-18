@@ -1,6 +1,6 @@
 # libraries
 import numpy as np
-import torus_alpha_complex as tac
+from . import torus_alpha_complex as tac
 
 
 

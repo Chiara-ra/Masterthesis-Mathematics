@@ -2,6 +2,8 @@
 import numpy as np
 import numpy.linalg as la
 import sympy as sp
+import gudhi as gd
+from . import simplex_classes as sc
 
 
 ## Auxiliary functions for torus_filtration()
