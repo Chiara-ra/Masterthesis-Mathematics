@@ -2,7 +2,7 @@
 import numpy as np
 import numpy.linalg as la
 import sympy as sp
-
+from .lattice import reduce_spanning_set_3d as rss3
 
 # Calculating the evolution of $\Lambda_0$
 

@@ -734,6 +734,17 @@ def preprocess_points(points, a, b, c, eps = 1e-5):
     return points
 
 
+def int2cont(filtration):
+    """
+    Takes filtration in the gudhi style of 
+    [([0], 0.0), ...]
+    and extracts a dictionary, with keys being the index
+    and the value being the corresponding continuous filtration value.
+    """
+    return {i: filtration[i][1] for i in range(len(filtration))}
+    
+
+
 
 
 ## The final torus_filtration()

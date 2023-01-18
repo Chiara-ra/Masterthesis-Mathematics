@@ -1,8 +1,12 @@
 # libraries
 import numpy as np
 from . import torus_alpha_complex as tac
+from . import torus_ph as tph
+from . import lambda0 
+from . import merge_tree
 
-
+bold0 = "\033[1m" # begin bold
+bold1 = "\033[0m" # end bold
 
 class ExamplePrint:
     def __init__(self, points, a=1, b=1, c=1):
@@ -24,9 +28,9 @@ class ExamplePrint:
                                                       b=self.scale_y,
                                                       c=self.scale_z)
         self.N = len(simplex_objects[0])
-        self.int2cont = int2cont(torus_filtration)
-        self.groups, self.pairs = PH(torus_filtration, simplex_objects)
-        self.evolution = Lambda_0_evolution(torus_filtration, self.N, self.pairs, self.trafo_matrix);
+        self.int2cont = tac.int2cont(torus_filtration)
+        self.groups, self.pairs = tph.PH(torus_filtration, simplex_objects)
+        self.evolution = lambda0.Lambda_0_evolution(torus_filtration, self.N, self.pairs, self.trafo_matrix);
 
         
     def describe_evolution(self):
@@ -39,9 +43,10 @@ class ExamplePrint:
             
 
     def describe_component_evolution(self, comp):
+        
         for i in range(len(self.evolution[comp])):
             state = self.evolution[comp][i]
-            if isinstance(state, StaticSublattice):
+            if isinstance(state, lambda0.StaticSublattice):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
 dimension = {state.dim}
@@ -50,7 +55,7 @@ det. ratio  = {float(state.det_rel):2.2f}
 basis = \n{state.basis_matrix}
                 """)
                 
-            elif isinstance(state, Merger):
+            elif isinstance(state, lambda0.Merger):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
 Component {state.old_component} merged to component {state.new_component}.
@@ -59,12 +64,12 @@ Component {state.old_component} merged to component {state.new_component}.
 
     def plot_evolution(self, cont_timesteps = True, width=5, height=7):
         if cont_timesteps:
-            plot_mergetree(self.evolution, 
+            merge_tree.plot_mergetree(self.evolution, 
                            continuous = self.int2cont, 
                            width=width, 
                            height=height)
         else:
-            plot_mergetree(self.evolution, 
+            merge_tree.plot_mergetree(self.evolution, 
                            continuous = None, 
                            width=width, 
                            height=height)

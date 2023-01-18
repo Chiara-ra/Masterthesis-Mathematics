@@ -1,5 +1,6 @@
 # libraries
 import numpy as np
+from . import simplex_classes as sc
 
 
 # Calculating torus PH
@@ -278,14 +279,4 @@ def plot_persistence_pairs(persistence_pairs):
     pair_list = [(pair.dim, pair.lifespan_cont) for pair in persistence_pairs]
     gd.plot_persistence_diagram(pair_list)
     
-    
-
-def int2cont(filtration):
-    """
-    Takes filtration in the gudhi style of 
-    [([0], 0.0), ...]
-    and extracts a dictionary, with keys being the index
-    and the value being the corresponding continuous filtration value.
-    """
-    return {i: filtration[i][1] for i in range(len(filtration))}
     
