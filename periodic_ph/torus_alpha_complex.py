@@ -761,8 +761,8 @@ class TorusComplex:
      
     def create_simplex_objects(self):
         for dim in range(4):
-            simplex_creator = CreateSimplexObject(dim)
-            self.simplex_objects[dim] = simplex_creator.create(self)
+            self.simplex_objects[dim] = create_simplex_objects(dim, self)
+            
             if dim == 0:
                 self.identification_list = create_identification_list(self.auxiliary_filtration[0],
                                                                       self.simplex_objects[0],
@@ -781,8 +781,39 @@ class TorusComplex:
             
     def calculate_components(self):
         calc_cc(self.simplex_objects)
-    
+
+
         
+        
+        
+        
+def create_simplex_objects(dimension, torus_complex):
+
+        simp0, simp1, simp2, simp3 = torus_complex.auxiliary_filtration
+
+        if dimesion == 0:
+            simplices = create_S0(simp0, 
+                                  torus_complex.coordinates)
+        elif dimension == 1:
+            simplices = create_S1(simp1, 
+                                  torus_complex.simplex_objects[0], 
+                                  torus_complex.coordinates, 
+                                  torus_complex.identification_list) 
+
+        elif dimension == 2:
+            simplices = create_S2(simp2, 
+                                  torus_complex.simplex_objects[0], 
+                                  torus_complex.simplex_objects[1], 
+                                  torus_complex.coordinates, 
+                                  torus_complex.identification_list)
+        elif dimension == 3:
+            simplices = create_S3(simp3, 
+                                  torus_complex.simplex_objects[0], 
+                                  torus_complex.simplex_objects[1], 
+                                  torus_complex.simplex_objects[2]
+                                  torus_complex.coordinates, 
+                                  torus_complex.identification_list)
+        return simplices
 
 ## The final torus_filtration()
 
@@ -809,6 +840,9 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
     # split unidentified simplices by dimension
     simp0, simp1, simp2, simp3 = dim_split(filtration)
     
+    
+    
+
     
     
     # 0-Simplices ---------------------------------
@@ -868,8 +902,12 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
     calc_cc(simplex_objects)
     
     
+    torus_complex = TorusComplex(filtration, coordinates)
+    torus_complex.create_simplex_objects()
+    torus_complex.generate_torus_filtration()
+    torus_complex.reorder_by_continuous_times()
+    torus_complex.rescale_cell(a, b, c)
+    torus_complex.calculate_components()
     
-
-    
-    return periodic_filt, simplex_objects
+    return torus_complex.torus_filtration, torus_complex.simplex_objects
     
