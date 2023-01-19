@@ -302,7 +302,7 @@ def create_S1(S1_list, S0, coords, identify_list):
     return S1
 
 
-def find_2Simplex_boundary(points,coords,S1, eps):
+def find_2Simplex_boundary(points, coords, S1, eps):
     """
     Input:
         points ... integer filtration values of vertices
@@ -355,7 +355,7 @@ def find_2Simplex_boundary(points,coords,S1, eps):
     return [bound_1, bound_2, bound_3]
 
 
-def create_S2(S2_list, S1, S0, coords, identify_list, eps):
+def create_S2(S2_list, S0, S1, coords, identify_list, eps):
     """
     Input: 
         Input:
@@ -435,7 +435,7 @@ def create_S2(S2_list, S1, S0, coords, identify_list, eps):
 
 
 
-def boundary4_from_rest(boundary1,boundary2,boundary3):
+def boundary4_from_rest(boundary1, boundary2, boundary3):
     """
     Given a 3-simplex, it has 4 boundary elements. 
     If we know 4 boundary 2-simplices, we can compare their respective edges.
@@ -498,7 +498,7 @@ def order_4_vertices(simp, coords):
 
 
 
-def create_S3(S3_list, S2, S1, S0, coords, identify_list, eps):
+def create_S3(S3_list, S0, S1, S2, coords, identify_list, eps):
     """
     Input: 
         Input:
@@ -836,7 +836,7 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
     points = preprocess_points(points, a, b, c, eps = eps)
     
     coords_unit, filtration = setup_unit_complex(points, max_alpha_square, a, b, c)
-    
+    """
     # split unidentified simplices by dimension
     simp0, simp1, simp2, simp3 = dim_split(filtration)
     
@@ -900,7 +900,7 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
     
     # Calculate connected components of 0 simplices
     calc_cc(simplex_objects)
-    
+    """
     
     torus_complex = TorusComplex(filtration, coordinates)
     torus_complex.create_simplex_objects()
