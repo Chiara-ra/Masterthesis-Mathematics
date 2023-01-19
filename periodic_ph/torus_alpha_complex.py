@@ -6,6 +6,9 @@ import gudhi as gd
 from . import simplex_classes as sc
 
 
+
+eps = 1e-5 # for identification purposes (rounding errors)
+    
 ## Auxiliary functions for torus_filtration()
 
 
@@ -102,7 +105,7 @@ def equiv_num(x1,x2):
     return min(z1,z2)
 
 
-def identification_list(S0_list, S0, coords, eps = 1e-5):
+def create_identification_list(S0_list, S0, coords, eps = 1e-5):
     """
     Input:
         S0_list ... naive filtration list  of 0-simplices ([3],3) as given by gudhi
@@ -583,7 +586,7 @@ def create_S3(S3_list, S2, S1, S0, coords, identify_list, eps):
 
 
 
-def generate_pfilt(S0,S1,S2,S3):
+def generate_pfilt(simplex_objects):
     """
     Takes the lists of simplex objects Si and generates the 
     mixed-dimension periodic filtration, so with all the simplices, but only saved
@@ -595,10 +598,10 @@ def generate_pfilt(S0,S1,S2,S3):
     This needs to be optimised / made prettier
     !
     """
-
+    
     periodic_filt = []
     
-    for simplices in [S0, S1, S2, S3]:
+    for simplices in simplex_objects:
         periodic_filt += [(simplex.verts, simplex.index_cont) for simplex in simplices]
 
     periodic_filt.sort(key = lambda some_tuple: some_tuple[1])
@@ -607,7 +610,7 @@ def generate_pfilt(S0,S1,S2,S3):
 
 
 
-def reorder_by_cont(S0,S1,S2,S3,periodic_filt):
+def reorder_by_cont(simplex_objects, periodic_filt):
     """
     Since the integer filtration value is wrong (first storted by dimension, 
     only then by actuall filtration value), this needs to be reordered.
@@ -619,7 +622,7 @@ def reorder_by_cont(S0,S1,S2,S3,periodic_filt):
     # so we replace in dummy_filt already picked elements with None
     dummy_filt = periodic_filt.copy()
     
-    for simplices in [S0,S1,S2,S3]:
+    for simplices in simplex_objects:
         update_index(simplices, dummy_filt)
 
 
@@ -747,10 +750,43 @@ def int2cont(filtration):
 
 
 
+class TorusComplex:
+    def __init__(self, filtration, coordinates):
+        self.auxiliary_filtration = list(dim_split(filtration))
+        self.simplex_objects = [[] for dim in range(4)]
+        self.identification_list = None
+        self.coordinates = coordinates
+        self.torus_filtration = None
+        
+     
+    def create_simplex_objects(self):
+        for dim in range(4):
+            simplex_creator = CreateSimplexObject(dim)
+            self.simplex_objects[dim] = simplex_creator.create(self)
+            if dim == 0:
+                self.identification_list = create_identification_list(self.auxiliary_filtration[0],
+                                                                      self.simplex_objects[0],
+                                                                      self.coordinates)
+    def generate_torus_filtration(self):
+        self.torus_filtration = generate_pfilt(self.simplex_objects)
+        
+    def reorder_by_continuous_times(self):
+        # re-assign correct integer filtration value
+        reorder_by_cont(self.simplex_objects, self.torus_filtration)
+        
+    def rescale_cell(self, a, b, c):
+        # rescaling to axbxc cuboid
+        for simplex in self.simplex_objects[0]:
+            simplex.transf_coord(a, b, c)
+            
+    def calculate_components(self):
+        calc_cc(self.simplex_objects)
+    
+        
+
 ## The final torus_filtration()
 
 
-   
 def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
 
     """
@@ -764,8 +800,6 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
         S             ... list of lists [S0,S1,S2,S3], each sub-list containing all Simplex objects of given dimension
     """
    
-    eps = 1e-5 # for identification purposes (rounding errors)
-    
     
     
     points = preprocess_points(points, a, b, c, eps = eps)
