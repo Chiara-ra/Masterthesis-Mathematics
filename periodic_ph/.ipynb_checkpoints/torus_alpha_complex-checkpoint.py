@@ -355,7 +355,7 @@ def find_2Simplex_boundary(points, coords, S1, eps):
     return [bound_1, bound_2, bound_3]
 
 
-def create_S2(S2_list, S0, S1, coords, identify_list, eps):
+def create_S2(S2_list, S0, S1, coords, identify_list):
     """
     Input: 
         Input:
@@ -498,7 +498,7 @@ def order_4_vertices(simp, coords):
 
 
 
-def create_S3(S3_list, S0, S1, S2, coords, identify_list, eps):
+def create_S3(S3_list, S0, S1, S2, coords, identify_list):
     """
     Input: 
         Input:
@@ -791,7 +791,7 @@ def create_simplex_objects(dimension, torus_complex):
 
         simp0, simp1, simp2, simp3 = torus_complex.auxiliary_filtration
 
-        if dimesion == 0:
+        if dimension == 0:
             simplices = create_S0(simp0, 
                                   torus_complex.coordinates)
         elif dimension == 1:
@@ -810,7 +810,7 @@ def create_simplex_objects(dimension, torus_complex):
             simplices = create_S3(simp3, 
                                   torus_complex.simplex_objects[0], 
                                   torus_complex.simplex_objects[1], 
-                                  torus_complex.simplex_objects[2]
+                                  torus_complex.simplex_objects[2],
                                   torus_complex.coordinates, 
                                   torus_complex.identification_list)
         return simplices
@@ -879,10 +879,10 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
 
     
     
-    """
-    !!!
-    We need a comment about what this step does
-    """
+
+    # !!!
+    # We need a comment about what this step does
+    
     periodic_filt = generate_pfilt(S0=S0, S1=S1, S2=S2, S3=S3)
     
     
@@ -902,7 +902,7 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
     calc_cc(simplex_objects)
     """
     
-    torus_complex = TorusComplex(filtration, coordinates)
+    torus_complex = TorusComplex(filtration, coords_unit)
     torus_complex.create_simplex_objects()
     torus_complex.generate_torus_filtration()
     torus_complex.reorder_by_continuous_times()
