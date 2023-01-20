@@ -1,6 +1,6 @@
 # libraries
 import numpy as np
-from . import simplex_classes as sc
+from .utils import simplex_classes as sc
 
 
 # Calculating torus PH
