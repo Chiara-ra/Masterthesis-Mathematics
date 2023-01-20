@@ -45,7 +45,7 @@ def torus_copy(points, a=1,b=1,c=1):
 ### Other functions
 
 
-def setup_unit_complex(points,max_alpha_square=float("inf"),a=1,b=1,c=1):
+def create_auxiliary_complex(points, a=1, b=1, c=1):
     """
     Setup for periodic_fitration() where the gudhi package is used
     to create an alpha filtration on the duplicated points. 
@@ -54,7 +54,7 @@ def setup_unit_complex(points,max_alpha_square=float("inf"),a=1,b=1,c=1):
 
     # alpha-complex gets generation by gudhi
     alpha_complex = gd.AlphaComplex(points_3x3x3)
-    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=max_alpha_square)
+    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=float("inf"))
     filtration = simplex_tree.get_filtration()   
     coords_cuboid = [alpha_complex.get_point(i) for i in range(len(points_3x3x3))]
 
@@ -515,12 +515,6 @@ def create_S3(S3_list, S0, S1, S2, coords, identify_list):
         and all vertices in lexicographical order
     """
     
-    """
-    !
-    This code is just copied from S2.
-    The code for S3 is not yet written (optional, since we don't need 3 simplices in my thesis) ...
-    """
-    
     
     S3 = []
     int_filt_value = len(S0) + len(S1) + len(S2)
@@ -565,7 +559,8 @@ def create_S3(S3_list, S0, S1, S2, coords, identify_list):
                     face4 = simp2 
                     """
                     !
-                    In this particular case, since boundary 4 is not outputted using the function we are used to
+                    In this particular case, since boundary 4 is not outputted 
+                    using the function we are used to
                     it might be that the == does not detect the permutation we have. 
                     !
                     """
@@ -721,7 +716,7 @@ def check_domain(points, a, b, c):
 
 
 
-def preprocess_points(points, a, b, c, eps = 1e-5):
+def preprocess_points(points, a, b, c):
     """
     Raise actual errors in this cases
     """
@@ -818,13 +813,12 @@ def create_simplex_objects(dimension, torus_complex):
 ## The final torus_filtration()
 
 
-def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
+def torus_filtration(points, a=1, b=1, c=1):
 
     """
     Input:
         a, b, c            ... side lengths of cell [0,a) x [0,b) x [0,c)
         points             ... numpy array of size (N,3) containing N points in cell
-        max_alpha_square   ... maximum alpha (squared) value of alpha-filtration
         
     Output:
         periodic_filt ... list of filtration elements of the form ([1,2,38],index_cont)
@@ -833,9 +827,9 @@ def torus_filtration(points, max_alpha_square=float("inf"), a=1, b=1, c=1):
    
     
     
-    points = preprocess_points(points, a, b, c, eps = eps)
+    points = preprocess_points(points, a, b, c)
     
-    coords_unit, filtration = setup_unit_complex(points, max_alpha_square, a, b, c)
+    coords_unit, filtration = create_auxiliary_complex(points, a, b, c)
     
     torus_complex = TorusComplex(filtration, coords_unit)
     torus_complex.create_simplex_objects()
