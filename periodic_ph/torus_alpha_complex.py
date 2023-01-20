@@ -13,13 +13,12 @@ eps = 1e-5 # for identification purposes (rounding errors)
 
 
 ### Duplicating points to neighbouring cells
-# Given points in a unit cell, this function duplicates them by translating to all neighbouring cells.  
 # This is an auxiliary step to calculating the _periodic_ $\alpha$-filtration. 
 
 def torus_copy(points, a=1,b=1,c=1):
     """
-    Takes numpy array points of N points on axbxc cube
-    and creates 8 copies surrounding it.
+    Takes numpy array of N points on axbxc cube
+    and creates 26 copies surrounding it.
     
     Returns new_points, containing original points and 9+8+9=26 offset copies,
     so Nx27 points in total.
@@ -42,7 +41,9 @@ def torus_copy(points, a=1,b=1,c=1):
     return new_points.reshape(-1,3)
 
 
-### Other functions
+
+
+# setup complex with extra points from which we calculate the torus complex
 
 
 def create_auxiliary_complex(points, a=1, b=1, c=1):
@@ -63,6 +64,9 @@ def create_auxiliary_complex(points, a=1, b=1, c=1):
 
     return coords_unit, filtration
 
+
+
+### Other functions
 
 
 def dim_split(filt):
@@ -734,10 +738,8 @@ def preprocess_points(points, a, b, c):
 
 def int2cont(filtration):
     """
-    Takes filtration in the gudhi style of 
-    [([0], 0.0), ...]
-    and extracts a dictionary, with keys being the index
-    and the value being the corresponding continuous filtration value.
+    Constructs dict from filtration list containing with key 
+    being integer time steps and values being corresponding continuous times.
     """
     return {i: filtration[i][1] for i in range(len(filtration))}
     
@@ -754,7 +756,7 @@ class TorusComplex:
         self.torus_filtration = None
         
      
-    def create_simplex_objects(self):
+    def create_complex(self):
         for dim in range(4):
             self.simplex_objects[dim] = create_simplex_objects(dim, self)
             
@@ -821,8 +823,8 @@ def torus_filtration(points, a=1, b=1, c=1):
         points             ... numpy array of size (N,3) containing N points in cell
         
     Output:
-        periodic_filt ... list of filtration elements of the form ([1,2,38],index_cont)
-        S             ... list of lists [S0,S1,S2,S3], each sub-list containing all Simplex objects of given dimension
+        list of filtration elements of the form ([1,2,38], index_cont)
+        list of lists, each sub-list containing all simplex objects of fixed dimension
     """
    
     
@@ -832,7 +834,7 @@ def torus_filtration(points, a=1, b=1, c=1):
     coords_unit, filtration = create_auxiliary_complex(points, a, b, c)
     
     torus_complex = TorusComplex(filtration, coords_unit)
-    torus_complex.create_simplex_objects()
+    torus_complex.create_complex()
     torus_complex.generate_torus_filtration()
     torus_complex.reorder_by_continuous_times()
     torus_complex.rescale_cell(a, b, c)
