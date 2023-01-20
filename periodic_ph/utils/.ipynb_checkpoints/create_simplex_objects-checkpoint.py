@@ -521,6 +521,3 @@ def create_S3(S3_list, S0, S1, S2, coords, identify_list):
             del face1,face2,face3,face4
     return S3
 
-
-### Functions for generating the (correct) torus filtration
-

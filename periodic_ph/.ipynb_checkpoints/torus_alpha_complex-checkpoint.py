@@ -131,6 +131,11 @@ def create_identification_list(S0_list, S0, coords, eps = 1e-5):
 
 
 
+### Functions for generating the (correct) torus filtration
+
+
+
+
 def generate_pfilt(simplex_objects):
     """
     Takes the lists of simplex objects Si and generates the 
