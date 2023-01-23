@@ -3,7 +3,7 @@ import numpy as np
 import sympy as sp
 import gudhi as gd
 from .utils import simplex_classes as sc
-from .utils.create_simplex_objects import create_simplex_objects
+from .utils.create_simplex_objects import create_torus_complex
 
 
 
@@ -84,50 +84,6 @@ def dim_split(filt):
         
     return simps_split[0], simps_split[1], simps_split[2], simps_split[3]
 
-
-def equiv_num(x1,x2):
-    """
-    Calculates 'x1-x2 mod 1', where we always want to take 
-    the representative with the smallest absolute value. 
-    """
-    z1 = abs((x1 - x2)%1)
-    z2 = abs(z1 - 1)
-    return min(z1,z2)
-
-
-def create_identification_list(S0_list, S0, coords, eps = 1e-5):
-    """
-    Input:
-        S0_list ... naive filtration list  of 0-simplices ([3],3) as given by gudhi
-        S0      ... list of Simplex0D objects generated from S0
-
-    Output:
-        identify_list ... list of lists with entries [i,j], 
-                           meaning that the ith vertex has to be matched to the jth Simplex0D object
-    """
-    # build identification list for later reference when building higher simplices
-    identify_list = []
-    
-    """
-    !
-    This loop below could be made much more efficient!
-    """
-
-    for i in range(len(S0_list)):
-        simp, filt_value = S0_list[i]
-        coord = np.array(coords[i])
-
-        for Simplex in S0: # looking for the point in the unit cell this corresponds to              
-            other_coord = Simplex.coords
-
-            if ((equiv_num(coord[0],other_coord[0])<eps) and 
-                (equiv_num(coord[1],other_coord[1])<eps) and
-                (equiv_num(coord[2],other_coord[2])<eps)):
-
-                identify_index = Simplex.index_total
-
-        identify_list.append([i, identify_index])
-    return identify_list
 
 
 
@@ -307,13 +263,8 @@ class TorusComplex:
         
      
     def create_complex(self):
-        for dim in range(4):
-            self.simplex_objects[dim] = create_simplex_objects(dim, self)
-            
-            if dim == 0:
-                self.identification_list = create_identification_list(self.auxiliary_filtration[0],
-                                                                      self.simplex_objects[0],
-                                                                      self.coordinates)
+        create_torus_complex(self)
+        
     def generate_torus_filtration(self):
         self.torus_filtration = generate_pfilt(self.simplex_objects)
         

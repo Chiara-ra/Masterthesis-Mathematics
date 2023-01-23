@@ -118,6 +118,69 @@ def crossing_vector(coord):
 
 # create simplex objects
 
+def create_torus_complex(torus_complex_object):
+    for dim in range(4):
+        torus_complex_object.simplex_objects[dim] = create_simplex_objects(dim, torus_complex_object)
+
+        if dim == 0:
+            torus_complex_object.identification_list = create_identification_list(torus_complex_object)
+            
+def create_identification_list(torus_complex_object):
+    """
+    Input:
+        S0_list ... naive filtration list  of 0-simplices ([3],3) as given by gudhi
+        S0      ... list of Simplex0D objects generated from S0
+
+    Output:
+        identify_list ... list of lists with entries [i,j], 
+                           meaning that the ith vertex has to be matched to the jth Simplex0D object
+    """
+    S0_list = torus_complex_object.auxiliary_filtration[0]
+    S0 = torus_complex_object.simplex_objects[0]
+    coords = torus_complex_object.coordinates
+    
+    # build identification list for later reference when building higher simplices
+    identify_list = []
+    
+    """
+    !
+    This loop below could be made much more efficient!
+    """
+
+    for i in range(len(S0_list)):
+        simp, filt_value = S0_list[i]
+        coord = np.array(coords[i])
+
+        for Simplex in S0: # looking for the point in the unit cell this corresponds to              
+            other_coord = Simplex.coords
+
+            if equivalent_coordinates_mod1(coord, other_coord):
+                identify_index = Simplex.index_total
+                break
+
+        identify_list.append([i, identify_index])
+    return identify_list
+
+
+def equivalent_coordinates_mod1(coordinate1, coordinate2):
+    return (equiv_num(coordinate1[0], coordinate2[0]) and 
+            equiv_num(coordinate1[1], coordinate2[1]) and
+            equiv_num(coordinate1[2], coordinate2[2])
+            )
+
+
+def equiv_num(x1, x2):
+    """
+    Evaluates if 'x1==x2 mod 1', w.r.t rounding errors. 
+    """
+    z1 = abs((x1 - x2)%1)
+    z2 = abs(z1 - 1)
+    return (min(z1, z2) < eps)
+
+
+
+
+
 
 def create_simplex_objects(dimension, torus_complex):
 
@@ -167,13 +230,15 @@ def create_S0(S0_list, coordinates):
     
     S0 = []
     
+    int_filt_value = 0
     for i, [simp, birth_time] in enumerate(S0_list):
         coordinate = coordinates[i]
         if check_bound(coordinate): # point lies inside main cell
-            S0.append(sc.Simplex0D([i], 
-                                    i,
+            S0.append(sc.Simplex0D([int_filt_value], 
+                                    int_filt_value,
                                     birth_time, 
-                                    coordinates))
+                                    coordinate))
+            int_filt_value +=1
             
     return S0
 
