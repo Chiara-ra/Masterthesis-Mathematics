@@ -473,6 +473,22 @@ def boundary4_from_rest(boundary1, boundary2, boundary3):
             boundary4.append(edge)
     return boundary4
 
+def find_3simplex_boundary(vertices, coordinates, S1):
+    vertex0, vertex1, vertex2, vertex3 = vertices
+    vertex0_coord, vertex1_coord, vertex2_coord, vertex3_coord = coordinates
+    
+    boundary1 = find_2Simplex_boundary([vertex0, vertex1, vertex2],
+                                       [vertex0_coord, vertex1_coord, vertex2_coord], 
+                                       S1)
+    boundary2 = find_2Simplex_boundary([vertex0, vertex1, vertex3],
+                                       [vertex0_coord, vertex1_coord, vertex3_coord], 
+                                       S1)
+    boundary3 = find_2Simplex_boundary([vertex0, vertex2, vertex3],
+                                       [vertex0_coord, vertex2_coord, vertex3_coord], 
+                                       S1)
+    boundary4 = boundary4_from_rest(boundary1, boundary2, boundary3)
+
+    return boundary1, boundary2, boundary3, boundary4
 
 
 def create_S3(S3_list, S0, S1, S2, coords, identification_list):
@@ -499,53 +515,28 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
         simp, filt_value = S3_list[i] 
         
         
-        vertices = [[simp[i], coords[simp[i]]] for i in range(len(simp))]
-
-        ([vertex0, vertex0_coord], 
-         [vertex1, vertex1_coord], 
-         [vertex2, vertex2_coord],
-         [vertex3, vertex3_coord]) = order_vertices_lexicographically(vertices)
+        vertices_w_coordinates = [[simp[i], coords[simp[i]]] for i in range(len(simp))]
+        vertices_w_coordinates = order_vertices_lexicographically(vertices_w_coordinates)
+        vertices = [entry[0] for entry in vertices_w_coordinates]
+        vertices_coordinates = [entry[1] for entry in vertices_w_coordinates]
         
         # only if vertex0 is in the main cell do we continue
-        if check_bound(vertex0_coord): 
+        if check_bound(vertices_coordinates[0]): 
+            face = [None for i in range(4)]
+
+            vertices = [identification_list[vertex] for vertex in vertices]
             
-            # the vertices are not yet in the naming convention we have chosen
-            # so we rename them using identification_list
-           
-            vertex0 = identification_list[vertex0]
-            vertex1 = identification_list[vertex1]
-            vertex2 = identification_list[vertex2]
-            vertex3 = identification_list[vertex3]
-            
-            
-
-            # we calculate 3 of the 6 1-simplices making up the 1-dim faces of our simplex
-            boundary1 = find_2Simplex_boundary([vertex0, vertex1, vertex2],
-                                               [vertex0_coord, vertex1_coord, vertex2_coord], 
-                                               S1)
-            boundary2 = find_2Simplex_boundary([vertex0, vertex1, vertex3],
-                                               [vertex0_coord, vertex1_coord, vertex3_coord], 
-                                               S1)
-            boundary3 = find_2Simplex_boundary([vertex0, vertex2, vertex3],
-                                               [vertex0_coord, vertex2_coord, vertex3_coord], 
-                                               S1)
-            boundary4 = boundary4_from_rest(boundary1,boundary2,boundary3)
+            boundary = find_3simplex_boundary(vertices,
+                                              vertices_coordinates, 
+                                              S1)
 
 
-            # these edges form the last face
-            # we now search for this last face
-
-            # then we search for the 3 2-simplices that can be idenfified using these faces
-            for simp2 in S2:
-                S_bound = simp2.boundary
-                if boundary1 == S_bound:
-                    face1 = simp2
-                elif boundary2 == S_bound:
-                    face2 = simp2
-                elif boundary3 == S_bound:
-                    face3 = simp2
-                elif boundary4 == S_bound:
-                    face4 = simp2 
+            # then we search for the 4 2-simplices that can be idenfified using these faces
+            for simplex_object in S2:
+                for i in range(4):
+                    if boundary[i] == simplex_object.boundary:
+                        face[i] = simplex_object
+                        break
                     """
                     !
                     In this particular case, since boundary 4 is not outputted 
@@ -554,15 +545,12 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
                     !
                     """
 
-            S3.append(sc.Simplex3D(sorted([vertex0,vertex1,vertex2,vertex3]), 
+            S3.append(sc.Simplex3D(sorted(vertices), 
                                    int_filt_value, 
                                    filt_value, 
-                                   [S0[vertex0],S0[vertex1],S0[vertex2],S0[vertex3]], 
-                                   [face1,face2,face3,face4]
+                                   [S0[vertex] for vertex in vertices], 
+                                   face
                                   )
                      )
             int_filt_value += 1
-            del face1,face2,face3,face4
     return S3
-
-# a b c a_coord b_coord c_coord
