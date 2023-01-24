@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.linalg as la
 from . import simplex_classes as sc
+from operator import itemgetter
 
 
 
@@ -30,6 +31,15 @@ def check_bound(point):
 
 
 
+
+def order_vertices_lexicographically(vertex_list):
+    """
+    Input: vertex_list ... list of vertices [index, [x,y,z]]
+    Output: sorted_list ... list of vertices ordered by x,y,z
+    """
+    return sorted(vertex_list, key=itemgetter(1))
+    
+    
 def order_vertex(indices, coords):
     """
     Takes two vertices and outputs them by lexicographical order.
@@ -48,6 +58,8 @@ def order_vertex(indices, coords):
     [n0, n1] = indices
     [x0, y0, z0] = np.around(coords[0],5)
     [x1, y1, z1] = np.around(coords[1],5)
+    
+    
     # we round to avoid ordering errors due to "same" being not the same
     
     
@@ -142,10 +154,6 @@ def create_identification_list(torus_complex_object):
     # build identification list for later reference when building higher simplices
     identification_list = []
     
-    """
-    !
-    This loop below could be made much more efficient!
-    """
 
     for i in range(len(S0_list)):
         simp, filt_value = S0_list[i]
@@ -276,22 +284,24 @@ def create_S1(S1_list, S0, coords, identification_list):
         simp, filt_value = S1_list[i]
 
         # check what the leftmost vertex is
-        [first_vertex, second_vertex], first_coordinate, second_coordinate = order_vertex(simp, [coords[simp[0]], coords[simp[1]]])
+        #[vertex0, vertex1], first_coordinate, second_coordinate = order_vertex(simp, [coords[simp[0]], coords[simp[1]]])
+        #POC
+        [vertex0, vertex0_coords], [vertex1, vertex1_coords] = order_vertices_lexicographically([[simp[0], coords[simp[0]]], [simp[1], coords[simp[1]]]])
         
         # Check if leftmost vertex is in unit cell
-        if check_bound(first_coordinate):
+        if check_bound(vertex0_coords):
 
             # Calculate crossing vector
-            cross_vec = create_crossing_vector(second_coordinate)
+            cross_vec = create_crossing_vector(vertex1_coords)
             
             # identify the old vertices with the newly numerated ones!!!!! 
             # both for simplex, as well as for ordered vertices
 
-            first_vertex_new  = (identification_list[first_vertex])
-            second_vertex_new = (identification_list[second_vertex])
+            vertex0_new  = (identification_list[vertex0])
+            vertex1_new = (identification_list[vertex1])
 
-            int_ordered_simp = sorted([first_vertex_new, second_vertex_new])
-            lex_ordered_simp = [S0[first_vertex_new], S0[second_vertex_new]]
+            int_ordered_simp = sorted([vertex0_new, vertex1_new])
+            lex_ordered_simp = [S0[vertex0_new], S0[vertex1_new]]
             
             S1.append(sc.Simplex1D(int_ordered_simp, 
                                    int_filt_value, 
@@ -307,7 +317,7 @@ def create_S1(S1_list, S0, coords, identification_list):
 
 
 
-def find_2Simplex_boundary(points, coords, S1, eps):
+def find_2Simplex_boundary(points, coords, S1):
     """
     Input:
         points ... integer filtration values of vertices
@@ -349,12 +359,14 @@ def find_2Simplex_boundary(points, coords, S1, eps):
         verts = Simplex.verts
         cv    = Simplex.cv
 
-            
-        if (verts[0] == verts_1[0]) and (verts[1] == verts_1[1]) and (la.norm(cv-cv_1)<eps):
+        edges_agree = lambda vertex0, vertex1, cv_0, cv_1: (vertex0[0] == vertex1[0] and
+                                                            vertex0[1] == vertex1[1] and
+                                                            la.norm(cv-cv_1) < eps)
+        if edges_agree(verts, verts_1, cv, cv_1):
             bound_1 = Simplex
-        if (verts[0] == verts_2[0]) and (verts[1] == verts_2[1]) and (la.norm(cv-cv_2)<eps):
+        if edges_agree(verts, verts_2, cv, cv_2):
             bound_2 = Simplex
-        if (verts[0] == verts_3[0]) and (verts[1] == verts_3[1]) and (la.norm(cv-cv_3)<eps):
+        if edges_agree(verts, verts_3, cv, cv_3):
             bound_3 = Simplex
        
     return [bound_1, bound_2, bound_3]
@@ -400,46 +412,41 @@ def create_S2(S2_list, S0, S1, coords, identification_list):
 
 
         # ordering vertices
-        a0 = simp[0]
-        b0 = simp[1]
-        c0 = simp[2]
-        a0_coord = coords[a0]
-        b0_coord = coords[b0]
-        c0_coord = coords[c0]
+        a = simp[0]
+        b = simp[1]
+        c = simp[2]
+        a_coord = coords[a]
+        b_coord = coords[b]
+        c_coord = coords[c]
+        
+        [vertex0, vertex0_coord], [vertex1, vertex1_coord], [vertex2, vertex2_coord] = order_vertices_lexicographically([[a, a_coord], [b, b_coord], [c, c_coord]])
 
-        [a1,b1], a1_coord, b1_coord = order_vertex([a0,b0], [a0_coord, b0_coord])
-        [a2,c1], a2_coord, c1_coord = order_vertex([a1,c0], [a1_coord, c0_coord])
-        [b2,c2], b2_coord, c2_coord = order_vertex([b1,c1], [b1_coord, c1_coord])
-
-        # a2 is the leftmost, b2 is the middle and c2 is the rightmost coordinate, 
-        # or a2 < b2 < c2 in lexicographical order
-
-
-        # only if a2 is in the main cell do we continue
-        if check_bound(a2_coord): 
+        # only if vertex0 is in the main cell do we continue
+        if check_bound(vertex0_coord): 
 
             # the vertices are not yet in the naming convention we have chosen
             # so we rename them using identification_list
             for i in range(len(identification_list)):
                 new_name = (identification_list[i])
-                if i == a2:
-                    a2 = new_name
-                if i == b2:
-                    b2 = new_name
-                if i == c2:
-                    c2 = new_name
+                if i == vertex0:
+                    vertex0 = new_name
+                if i == vertex1:
+                    vertex1 = new_name
+                if i == vertex2:
+                    vertex2 = new_name
 
 
-            bound_1, bound_2, bound_3 = find_2Simplex_boundary([a2,b2,c2],[a2_coord,b2_coord,c2_coord], S1, eps = eps)
+            bound_1, bound_2, bound_3 = find_2Simplex_boundary([vertex0, vertex1, vertex2],
+                                                               [vertex0_coord, vertex1_coord, vertex2_coord], 
+                                                               S1)
 
-            S2.append(sc.Simplex2D(sorted([a2,b2,c2]), 
+            S2.append(sc.Simplex2D(sorted([vertex0,vertex1,vertex2]), 
                                    int_filt_value, 
                                    filt_value, 
-                                   [S0[a2],S0[b2],S0[c2]], 
+                                   [S0[vertex0],S0[vertex1],S0[vertex2]], 
                                    [bound_1, bound_2, bound_3]))
             int_filt_value += 1
     return S2
-
 
 
 
@@ -468,44 +475,6 @@ def boundary4_from_rest(boundary1, boundary2, boundary3):
 
 
 
-def order_4_vertices(simp, coords):
-    """
-    Input:
-        simp   ... 3-simplex constituted of 4 vertices, for example simp=[1,2,3,4]
-        coords ... coordinates of the 4 vertices in the same order as in simp
-    Ouptut:
-        Integer filtration values and coordinates of the 4 points in 
-        lexicographical order as dictated by their coordinates.
-    """
-    [n1, n2, n3, n4] = simp
-    coord1 = coords[n1]
-    coord2 = coords[n2]
-    coord3 = coords[n3]
-    coord4 = coords[n4]
-
-    # ordering vertices
-    a0 = n1
-    b0 = n2
-    c0 = n3
-    d0 = n4
-    a0_coord = coord1
-    b0_coord = coord2
-    c0_coord = coord3
-    d0_coord = coord4
-
-    [a1,b1], a1_coord, b1_coord = order_vertex([a0,b0], [a0_coord, b0_coord])
-    [a2,c1], a2_coord, c1_coord = order_vertex([a1,c0], [a1_coord, c0_coord])
-    [a3,d1], a3_coord, d1_coord = order_vertex([a2,d0], [a2_coord, d0_coord])
-    # a3 is minimum
-    [b2,c2], b2_coord, c2_coord = order_vertex([b1,c1], [b1_coord, c1_coord])
-    [b3,d2], b3_coord, d2_coord = order_vertex([b2,d1], [b2_coord, d1_coord])
-    # b3 is second smallest
-    [c3,d3], c3_coord, d3_coord = order_vertex([c2,d2], [c2_coord, d2_coord])
-
-    return a3,b3,c3,d3,a3_coord,b3_coord,c3_coord,d3_coord
-
-
-
 def create_S3(S3_list, S0, S1, S2, coords, identification_list):
     """
     Input: 
@@ -529,25 +498,37 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
     for i in range(len(S3_list)):
         simp, filt_value = S3_list[i] 
         
-        a,b,c,d,a_coord,b_coord,c_coord,d_coord = order_4_vertices(simp, coords)
         
-        # only if a3 is in the main cell do we continue
-        if check_bound(a_coord): 
+        vertices = [[simp[i], coords[simp[i]]] for i in range(len(simp))]
+
+        ([vertex0, vertex0_coord], 
+         [vertex1, vertex1_coord], 
+         [vertex2, vertex2_coord],
+         [vertex3, vertex3_coord]) = order_vertices_lexicographically(vertices)
+        
+        # only if vertex0 is in the main cell do we continue
+        if check_bound(vertex0_coord): 
             
             # the vertices are not yet in the naming convention we have chosen
             # so we rename them using identification_list
            
-            a = identification_list[a]
-            b = identification_list[b]
-            c = identification_list[c]
-            d = identification_list[d]
+            vertex0 = identification_list[vertex0]
+            vertex1 = identification_list[vertex1]
+            vertex2 = identification_list[vertex2]
+            vertex3 = identification_list[vertex3]
             
             
 
             # we calculate 3 of the 6 1-simplices making up the 1-dim faces of our simplex
-            boundary1 = find_2Simplex_boundary([a,b,c],[a_coord,b_coord,c_coord],S1, eps = eps)
-            boundary2 = find_2Simplex_boundary([a,b,d],[a_coord,b_coord,d_coord],S1, eps = eps)
-            boundary3 = find_2Simplex_boundary([a,c,d],[a_coord,c_coord,d_coord],S1, eps = eps)
+            boundary1 = find_2Simplex_boundary([vertex0, vertex1, vertex2],
+                                               [vertex0_coord, vertex1_coord, vertex2_coord], 
+                                               S1)
+            boundary2 = find_2Simplex_boundary([vertex0, vertex1, vertex3],
+                                               [vertex0_coord, vertex1_coord, vertex3_coord], 
+                                               S1)
+            boundary3 = find_2Simplex_boundary([vertex0, vertex2, vertex3],
+                                               [vertex0_coord, vertex2_coord, vertex3_coord], 
+                                               S1)
             boundary4 = boundary4_from_rest(boundary1,boundary2,boundary3)
 
 
@@ -573,10 +554,10 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
                     !
                     """
 
-            S3.append(sc.Simplex3D(sorted([a,b,c,d]), 
+            S3.append(sc.Simplex3D(sorted([vertex0,vertex1,vertex2,vertex3]), 
                                    int_filt_value, 
                                    filt_value, 
-                                   [S0[a],S0[b],S0[c],S0[d]], 
+                                   [S0[vertex0],S0[vertex1],S0[vertex2],S0[vertex3]], 
                                    [face1,face2,face3,face4]
                                   )
                      )
@@ -584,3 +565,4 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
             del face1,face2,face3,face4
     return S3
 
+# a b c a_coord b_coord c_coord
