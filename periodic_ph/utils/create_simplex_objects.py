@@ -132,7 +132,7 @@ def create_identification_list(torus_complex_object):
         S0      ... list of Simplex0D objects generated from S0
 
     Output:
-        identify_list ... list of lists with entries [i,j], 
+        identification_list ... list of lists with entries [i,j], 
                            meaning that the ith vertex has to be matched to the jth Simplex0D object
     """
     S0_list = torus_complex_object.auxiliary_filtration[0]
@@ -140,7 +140,7 @@ def create_identification_list(torus_complex_object):
     coords = torus_complex_object.coordinates
     
     # build identification list for later reference when building higher simplices
-    identify_list = []
+    identification_list = []
     
     """
     !
@@ -158,8 +158,8 @@ def create_identification_list(torus_complex_object):
                 identify_index = Simplex.index_total
                 break
 
-        identify_list.append([i, identify_index])
-    return identify_list
+        identification_list.append([i, identify_index])
+    return identification_list
 
 
 def equivalent_coordinates_mod1(coordinate1, coordinate2):
@@ -248,7 +248,7 @@ def create_S0(S0_list, coordinates):
 
 
 
-def create_S1(S1_list, S0, coords, identify_list):
+def create_S1(S1_list, S0, coords, identification_list):
     """
     Input: 
         Input:
@@ -256,7 +256,7 @@ def create_S1(S1_list, S0, coords, identify_list):
         after having split them by dimension
         S0 ...List of Simplex0D objects of the filtration
         coords ... list of coordinates of vertices ordered by integer filtration value
-        identify_list ... identification list for periodically copied points as given by identification_list()
+        identification_list ... identification list for periodically copied points as given by identification_list()
         
     Output: 
         S1 ... List of Simplex1D objects containing the combinatorical representation,
@@ -287,8 +287,8 @@ def create_S1(S1_list, S0, coords, identify_list):
             # identify the old vertices with the newly numerated ones!!!!! 
             # both for simplex, as well as for ordered vertices
 
-            n_left_new  = (identify_list[n_left])[1]
-            n_right_new = (identify_list[n_right])[1]
+            n_left_new  = (identification_list[n_left])[1]
+            n_right_new = (identification_list[n_right])[1]
 
             int_ordered_simp = sorted([n_left_new,n_right_new])
             lex_ordered_simp = [S0[n_left_new], S0[n_right_new]]
@@ -363,7 +363,7 @@ def find_2Simplex_boundary(points, coords, S1, eps):
 
 
 
-def create_S2(S2_list, S0, S1, coords, identify_list):
+def create_S2(S2_list, S0, S1, coords, identification_list):
     """
     Input: 
         Input:
@@ -371,7 +371,7 @@ def create_S2(S2_list, S0, S1, coords, identify_list):
         after having split them by dimension
         S1 ... List of Simplex1D objects of the filtration
         coords ... list of coordinates of vertices ordered by integer filtration value
-        identify_list ... identification list for periodically copied points as given by identification_list()
+        identification_list ... identification list for periodically copied points as given by identification_list()
         
     Output: 
         S2 ... List of Simplex2D objects containing the combinatorical representation,
@@ -419,9 +419,9 @@ def create_S2(S2_list, S0, S1, coords, identify_list):
         if check_bound(a2_coord): 
 
             # the vertices are not yet in the naming convention we have chosen
-            # so we rename them using identify_list
-            for i in range(len(identify_list)):
-                new_name = (identify_list[i])[1]
+            # so we rename them using identification_list
+            for i in range(len(identification_list)):
+                new_name = (identification_list[i])[1]
                 if i == a2:
                     a2 = new_name
                 if i == b2:
@@ -506,7 +506,7 @@ def order_4_vertices(simp, coords):
 
 
 
-def create_S3(S3_list, S0, S1, S2, coords, identify_list):
+def create_S3(S3_list, S0, S1, S2, coords, identification_list):
     """
     Input: 
         Input:
@@ -514,7 +514,7 @@ def create_S3(S3_list, S0, S1, S2, coords, identify_list):
         after having split them by dimension
         S2 ... List of Simplex1D objects of the filtration
         coords ... list of coordinates of vertices ordered by integer filtration value
-        identify_list ... identification list for periodically copied points as given by identification_list()
+        identification_list ... identification list for periodically copied points as given by identification_list()
         
     Output: 
         S3 ... List of Simplex3D objects containing the combinatorical representation,
@@ -535,12 +535,12 @@ def create_S3(S3_list, S0, S1, S2, coords, identify_list):
         if check_bound(a_coord): 
             
             # the vertices are not yet in the naming convention we have chosen
-            # so we rename them using identify_list
+            # so we rename them using identification_list
            
-            a = identify_list[a][1]
-            b = identify_list[b][1]
-            c = identify_list[c][1]
-            d = identify_list[d][1]
+            a = identification_list[a][1]
+            b = identification_list[b][1]
+            c = identification_list[c][1]
+            d = identification_list[d][1]
             
             
 
