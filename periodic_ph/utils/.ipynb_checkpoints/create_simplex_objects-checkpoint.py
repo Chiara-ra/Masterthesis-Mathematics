@@ -80,7 +80,7 @@ def order_vertex(indices, coords):
 
 
 
-def crossing_vector(coord):
+def create_crossing_vector(coord):
     """
     Takes coordinates coord=[x,y,z], which lie in unit_cube
     OR any of the 17 farther-right adjecent cells (up, up-right, right, low-right or low).
@@ -282,7 +282,7 @@ def create_S1(S1_list, S0, coords, identify_list):
         if check_bound(coord_left):
 
             # Calculate crossing vector
-            cross_vec = crossing_vector(coord_right)
+            cross_vec = create_crossing_vector(coord_right)
             
             # identify the old vertices with the newly numerated ones!!!!! 
             # both for simplex, as well as for ordered vertices
@@ -332,15 +332,15 @@ def find_2Simplex_boundary(points, coords, S1, eps):
     
     # first boundary element from p1 to p2
     verts_1  = sorted([p1, p2])
-    cv_1 = crossing_vector(p2_coord)
+    cv_1 = create_crossing_vector(p2_coord)
 
     # second boundary element from p1 to p3
     verts_2  = sorted([p1, p3])
-    cv_2 = crossing_vector(p3_coord)
+    cv_2 = create_crossing_vector(p3_coord)
 
     # third boundary element from p2 to p3
     verts_3  = sorted([p2, p3])
-    cv_3 = crossing_vector(p3_coord - crossing_vector(p2_coord))
+    cv_3 = create_crossing_vector(p3_coord - create_crossing_vector(p2_coord))
     
     
     for j in range(len(S1)):
