@@ -158,7 +158,7 @@ def create_identification_list(torus_complex_object):
                 identify_index = Simplex.index_total
                 break
 
-        identification_list.append([i, identify_index])
+        identification_list.append(identify_index)
     return identification_list
 
 
@@ -276,22 +276,22 @@ def create_S1(S1_list, S0, coords, identification_list):
         simp, filt_value = S1_list[i]
 
         # check what the leftmost vertex is
-        [n_left, n_right], coord_left, coord_right = order_vertex(simp, [coords[simp[0]], coords[simp[1]]])
+        [first_vertex, second_vertex], first_coordinate, second_coordinate = order_vertex(simp, [coords[simp[0]], coords[simp[1]]])
         
         # Check if leftmost vertex is in unit cell
-        if check_bound(coord_left):
+        if check_bound(first_coordinate):
 
             # Calculate crossing vector
-            cross_vec = create_crossing_vector(coord_right)
+            cross_vec = create_crossing_vector(second_coordinate)
             
             # identify the old vertices with the newly numerated ones!!!!! 
             # both for simplex, as well as for ordered vertices
 
-            n_left_new  = (identification_list[n_left])[1]
-            n_right_new = (identification_list[n_right])[1]
+            first_vertex_new  = (identification_list[first_vertex])
+            second_vertex_new = (identification_list[second_vertex])
 
-            int_ordered_simp = sorted([n_left_new,n_right_new])
-            lex_ordered_simp = [S0[n_left_new], S0[n_right_new]]
+            int_ordered_simp = sorted([first_vertex_new, second_vertex_new])
+            lex_ordered_simp = [S0[first_vertex_new], S0[second_vertex_new]]
             
             S1.append(sc.Simplex1D(int_ordered_simp, 
                                    int_filt_value, 
@@ -421,7 +421,7 @@ def create_S2(S2_list, S0, S1, coords, identification_list):
             # the vertices are not yet in the naming convention we have chosen
             # so we rename them using identification_list
             for i in range(len(identification_list)):
-                new_name = (identification_list[i])[1]
+                new_name = (identification_list[i])
                 if i == a2:
                     a2 = new_name
                 if i == b2:
@@ -537,10 +537,10 @@ def create_S3(S3_list, S0, S1, S2, coords, identification_list):
             # the vertices are not yet in the naming convention we have chosen
             # so we rename them using identification_list
            
-            a = identification_list[a][1]
-            b = identification_list[b][1]
-            c = identification_list[c][1]
-            d = identification_list[d][1]
+            a = identification_list[a]
+            b = identification_list[b]
+            c = identification_list[c]
+            d = identification_list[d]
             
             
 
