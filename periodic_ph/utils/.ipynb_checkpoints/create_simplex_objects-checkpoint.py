@@ -271,7 +271,7 @@ def create_S1(torus_complex_object):
 
 
 
-def find_2Simplex_boundary(points, coords, S1):
+def find_2Simplex_boundary(vertices, vertices_coordinates, S1):
     """
     Input:
         points ... integer filtration values of vertices
@@ -283,41 +283,34 @@ def find_2Simplex_boundary(points, coords, S1):
     """
 
 
+    boundary = [None for i in range(3)]
+    edge_vertices = [None for i in range(3)]
+    crossing_vectors = [None for i in range(3)]
+    edge_order = [[0,1],[0,2],[1,2]]
     
-    
-    p1,p2,p3 = points
-    p1_coord, p2_coord, p3_coord = coords
-    
-    # first boundary element from p1 to p2
-    verts_1  = sorted([p1, p2])
-    cv_1 = create_crossing_vector(p2_coord)
-
-    # second boundary element from p1 to p3
-    verts_2  = sorted([p1, p3])
-    cv_2 = create_crossing_vector(p3_coord)
-
-    # third boundary element from p2 to p3
-    verts_3  = sorted([p2, p3])
-    cv_3 = create_crossing_vector(p3_coord - create_crossing_vector(p2_coord))
-    
+    for i in range(3):
+        edge_vertices[i] = sorted([vertices[edge_order[i][0]],
+                                   vertices[edge_order[i][1]]
+                                  ])
+        if i < 2:
+            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]])
+        else:
+            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]]
+                                                         - crossing_vectors[0]
+                                                        )
     
     for j in range(len(S1)):
-        
-        Simplex = S1[j]
-        verts = Simplex.verts
-        cv    = Simplex.cv
+        simplex = S1[j]
+        verts = simplex.verts
+        cv    = simplex.cv
 
-        edges_agree = lambda vertex0, vertex1, cv_0, cv_1: (vertex0[0] == vertex1[0] and
-                                                            vertex0[1] == vertex1[1] and
-                                                            la.norm(cv-cv_1) < eps)
-        if edges_agree(verts, verts_1, cv, cv_1):
-            bound_1 = Simplex
-        if edges_agree(verts, verts_2, cv, cv_2):
-            bound_2 = Simplex
-        if edges_agree(verts, verts_3, cv, cv_3):
-            bound_3 = Simplex
-       
-    return [bound_1, bound_2, bound_3]
+        edges_agree = lambda v0, v1, cv_0, cv_1: (v0[0] == v1[0] and v0[1] == v1[1] 
+                                                  and la.norm(cv-cv_1) < eps)
+        for i in range(3):
+            if edges_agree(verts, edge_vertices[i], cv, crossing_vectors[i]):
+                boundary[i] = simplex
+            
+    return boundary
 
 
 
@@ -495,7 +488,7 @@ def create_S3(torus_complex_object):
             int_filt_value += 1
     torus_complex_object.simplex_objects[3] = S3
 
- 
+
 
 
 
