@@ -305,8 +305,7 @@ def find_2Simplex_boundary(vertices, vertices_coordinates, S1):
     boundary = [None for i in range(3)]
     
     
-    for j in range(len(S1)):
-        simplex = S1[j]
+    for simplex in S1:
         verts = simplex.verts
         cv    = simplex.cv
 
