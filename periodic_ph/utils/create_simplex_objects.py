@@ -268,7 +268,23 @@ def create_S1(torus_complex_object):
     torus_complex_object.simplex_objects[1] = S1
 
 
-
+def find_crossing_vectors_and_vertices_of_2simplex_boundary(vertices, vertices_coordinates):
+    edge_order = [[0,1],[0,2],[1,2]]
+    
+    edge_vertices = [None for i in range(3)]
+    crossing_vectors = [None for i in range(3)]
+    
+    for i in range(3):
+        edge_vertices[i] = sorted([vertices[edge_order[i][0]],
+                                   vertices[edge_order[i][1]]
+                                  ])
+        if i < 2:
+            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]])
+        else:
+            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]]
+                                                         - crossing_vectors[0]
+                                                        )
+    return edge_vertices, crossing_vectors
 
 
 def find_2Simplex_boundary(vertices, vertices_coordinates, S1):
@@ -283,21 +299,11 @@ def find_2Simplex_boundary(vertices, vertices_coordinates, S1):
     """
 
 
-    boundary = [None for i in range(3)]
-    edge_vertices = [None for i in range(3)]
-    crossing_vectors = [None for i in range(3)]
-    edge_order = [[0,1],[0,2],[1,2]]
     
-    for i in range(3):
-        edge_vertices[i] = sorted([vertices[edge_order[i][0]],
-                                   vertices[edge_order[i][1]]
-                                  ])
-        if i < 2:
-            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]])
-        else:
-            crossing_vectors[i] = create_crossing_vector(vertices_coordinates[edge_order[i][1]]
-                                                         - crossing_vectors[0]
-                                                        )
+    edge_vertices, crossing_vectors = find_crossing_vectors_and_vertices_of_2simplex_boundary(vertices, vertices_coordinates)
+    
+    boundary = [None for i in range(3)]
+    
     
     for j in range(len(S1)):
         simplex = S1[j]
