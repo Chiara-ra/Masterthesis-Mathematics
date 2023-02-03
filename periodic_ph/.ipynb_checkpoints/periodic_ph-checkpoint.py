@@ -4,6 +4,7 @@ from . import torus_alpha_complex as tac
 from . import torus_ph as tph
 from . import lambda0 
 from . import merge_tree
+from .utils.preprocess_points import preprocess_points
 
 bold0 = "\033[1m" # begin bold
 bold1 = "\033[0m" # end bold
@@ -23,7 +24,11 @@ class ExamplePrint:
         self.int2cont = None
         
     def calculate_pph(self):
-        torus_filtration, simplex_objects = tac.torus_filtration(self.points,
+        preprocessed_points = preprocess_points(self.points,
+                                                      a=self.scale_x,
+                                                      b=self.scale_y,
+                                                      c=self.scale_z)
+        torus_filtration, simplex_objects = tac.torus_filtration(preprocessed_points,
                                                       a=self.scale_x,
                                                       b=self.scale_y,
                                                       c=self.scale_z)

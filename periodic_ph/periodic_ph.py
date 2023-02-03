@@ -24,7 +24,10 @@ class ExamplePrint:
         self.int2cont = None
         
     def calculate_pph(self):
-        preprocessed_points = preprocess_points(self.points)
+        preprocessed_points = preprocess_points(self.points,
+                                                      a=self.scale_x,
+                                                      b=self.scale_y,
+                                                      c=self.scale_z)
         torus_filtration, simplex_objects = tac.torus_filtration(preprocessed_points,
                                                       a=self.scale_x,
                                                       b=self.scale_y,
