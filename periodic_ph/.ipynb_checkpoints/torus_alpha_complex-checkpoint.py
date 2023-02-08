@@ -3,7 +3,7 @@ import numpy as np
 import sympy as sp
 import gudhi as gd
 from .utils import simplex_classes as sc
-from .utils.create_simplex_objects import build_torus_complex
+from .utils.create_simplex_objects import build_torus_simplices
 
 
 
@@ -206,9 +206,6 @@ class TorusComplex:
         self.coordinates = coordinates
         self.torus_filtration = None
         
-     
-    def build_complex(self):
-        build_torus_complex(self)
         
     def generate_torus_filtration(self):
         self.torus_filtration = generate_pfilt(self.simplex_objects)
@@ -224,6 +221,11 @@ class TorusComplex:
             
     def calculate_components(self):
         calc_cc(self.simplex_objects)
+        
+    def create_normalised_complex(self):
+        build_torus_simplices(self)
+        self.generate_torus_filtration()
+        self.reorder_by_continuous_times()
 
 
         
@@ -246,9 +248,7 @@ def create_torus_complex(points, a=1, b=1, c=1):
     coords_unit, filtration = create_auxiliary_complex(points, a, b, c)
     
     torus_complex = TorusComplex(filtration, coords_unit)
-    torus_complex.build_complex()
-    torus_complex.generate_torus_filtration()
-    torus_complex.reorder_by_continuous_times()
+    torus_complex.create_normalised_complex()
     torus_complex.rescale_cell(a, b, c)
     torus_complex.calculate_components()
     

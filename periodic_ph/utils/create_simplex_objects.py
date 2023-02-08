@@ -515,7 +515,7 @@ def create_simplex_objects(dimension, torus_complex_object):
 
 
     
-def build_torus_complex(torus_complex_object):
+def build_torus_simplices(torus_complex_object):
     for dim in range(4):
         create_simplex_objects(dim, torus_complex_object)
 
