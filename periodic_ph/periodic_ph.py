@@ -25,13 +25,13 @@ class ExamplePrint:
         
     def calculate_pph(self):
         preprocessed_points = preprocess_points(self.points,
-                                                      a=self.scale_x,
-                                                      b=self.scale_y,
-                                                      c=self.scale_z)
-        torus_filtration, simplex_objects = tac.torus_filtration(preprocessed_points,
-                                                      a=self.scale_x,
-                                                      b=self.scale_y,
-                                                      c=self.scale_z)
+                                                a=self.scale_x,
+                                                b=self.scale_y,
+                                                c=self.scale_z)
+        torus_filtration, simplex_objects = tac.create_torus_complex(preprocessed_points,
+                                                                     a=self.scale_x,
+                                                                     b=self.scale_y,
+                                                                     c=self.scale_z)
         self.N = len(simplex_objects[0])
         self.int2cont = tac.int2cont(torus_filtration)
         self.groups, self.pairs = tph.PH(torus_filtration, simplex_objects)

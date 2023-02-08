@@ -28,7 +28,7 @@ class ExamplePrint:
                                                       a=self.scale_x,
                                                       b=self.scale_y,
                                                       c=self.scale_z)
-        torus_filtration, simplex_objects = tac.torus_filtration(preprocessed_points,
+        torus_filtration, simplex_objects = tac.create_torus_complex(preprocessed_points,
                                                       a=self.scale_x,
                                                       b=self.scale_y,
                                                       c=self.scale_z)

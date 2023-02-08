@@ -3,7 +3,7 @@ import numpy as np
 import sympy as sp
 import gudhi as gd
 from .utils import simplex_classes as sc
-from .utils.create_simplex_objects import create_torus_complex
+from .utils.create_simplex_objects import build_torus_complex
 
 
 
@@ -47,7 +47,7 @@ def create_auxiliary_complex(points, a=1, b=1, c=1):
     Setup for periodic_fitration() where the gudhi package is used
     to create an alpha filtration on the duplicated points. 
     """
-    points_3x3x3 = torus_copy(points,a,b,c)
+    points_3x3x3 = torus_copy(points, a, b, c)
 
     # alpha-complex gets generation by gudhi
     alpha_complex = gd.AlphaComplex(points_3x3x3)
@@ -207,8 +207,8 @@ class TorusComplex:
         self.torus_filtration = None
         
      
-    def create_complex(self):
-        create_torus_complex(self)
+    def build_complex(self):
+        build_torus_complex(self)
         
     def generate_torus_filtration(self):
         self.torus_filtration = generate_pfilt(self.simplex_objects)
@@ -232,7 +232,7 @@ class TorusComplex:
 ## The final torus_filtration()
 
 
-def torus_filtration(points, a=1, b=1, c=1):
+def create_torus_complex(points, a=1, b=1, c=1):
 
     """
     Input:
@@ -246,7 +246,7 @@ def torus_filtration(points, a=1, b=1, c=1):
     coords_unit, filtration = create_auxiliary_complex(points, a, b, c)
     
     torus_complex = TorusComplex(filtration, coords_unit)
-    torus_complex.create_complex()
+    torus_complex.build_complex()
     torus_complex.generate_torus_filtration()
     torus_complex.reorder_by_continuous_times()
     torus_complex.rescale_cell(a, b, c)
