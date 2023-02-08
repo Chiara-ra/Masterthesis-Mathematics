@@ -1,54 +1,27 @@
 # libraries
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 # CHANGE SIMPLEX CLASSES TO DATACLASSES
-"""
+
 
 @dataclass
 class Simplex:
     verts: list
-    index_total: int
     index_dim: int
-    index_cont: float
-    dim: int = len
+    index_cont: int
     
+    index_total: int = field(init=False, repr=True)
+    dim: int = field(init=False, repr=True)
     
-    name: str
-    unit_price: float
-    quantity_on_hand: int = 0
-
-    def total_cost(self) -> float:
-        return self.unit_price * self.quantity_on_hand
-
-# will add, among other things, a __init__() that looks like:
-
-def __init__(self, name: str, unit_price: float, quantity_on_hand: int = 0):
-    self.name = name
-    self.unit_price = unit_price
-    self.quantity_on_hand = quantity_on_hand
-
-
-
-"""
-
-
-
-
-
-class Simplex:
-    def __init__(self, vertices, int_filt, cont_filt):
-        self.verts = vertices
-        self.index_total = int_filt 
-        self.index_dim = int_filt
-        self.index_cont = cont_filt 
+    def __post_init__(self):
+        self.index_total = self.index_dim
         self.dim = len(self.verts)-1
 
     def update_index_total(self, new_val):
         self.index_total = new_val
 
-        
         
         
         
