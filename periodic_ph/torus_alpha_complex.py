@@ -55,10 +55,8 @@ def create_auxiliary_complex(points, a=1, b=1, c=1):
     filtration = simplex_tree.get_filtration()   
     coords_cuboid = [alpha_complex.get_point(i) for i in range(len(points_3x3x3))]
 
-    # SWITCH: axbxc --> 1x1x1
-    coords_unit = [[x/a, y/b, z/c] for [x,y,z] in coords_cuboid]
-
-    return coords_unit, filtration
+    
+    return coords_cuboid, filtration
 
 
 
@@ -226,6 +224,7 @@ class TorusComplex:
         build_torus_simplices(self)
         self.generate_torus_filtration()
         self.reorder_by_continuous_times()
+        self.calculate_components()
 
 
         
@@ -245,12 +244,15 @@ def create_torus_complex(points, a=1, b=1, c=1):
         list of filtration elements of the form ([1,2,38], index_cont)
         list of lists, each sub-list containing all simplex objects of fixed dimension
     """
-    coords_unit, filtration = create_auxiliary_complex(points, a, b, c)
+    coords_cuboid, filtration = create_auxiliary_complex(points, a, b, c)
     
+    # SWITCH: axbxc --> 1x1x1
+    coords_unit = [[x/a, y/b, z/c] for [x,y,z] in coords_cuboid]
+
     torus_complex = TorusComplex(filtration, coords_unit)
     torus_complex.create_normalised_complex()
     torus_complex.rescale_cell(a, b, c)
-    torus_complex.calculate_components()
+    
     
     return torus_complex.torus_filtration, torus_complex.simplex_objects
     
