@@ -9,7 +9,7 @@ from .utils.preprocess_points import preprocess_points
 bold0 = "\033[1m" # begin bold
 bold1 = "\033[0m" # end bold
 
-class ExamplePrint:
+class PeriodicPersistence:
     def __init__(self, points, a=1, b=1, c=1):
         self.points = points
         self.scale_x = a
