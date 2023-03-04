@@ -3,7 +3,7 @@ import numpy as np
 from . import torus_alpha_complex as tac
 from . import torus_ph as tph
 from . import lambda0 
-from . import merge_tree
+from .plotting import merge_tree
 from .utils.preprocess_points import preprocess_points
 
 bold0 = "\033[1m" # begin bold

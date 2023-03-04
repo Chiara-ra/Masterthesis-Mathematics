@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import sympy as sp
 from copy import deepcopy
-from . import lambda0 
+from .. import lambda0 
 
 
 # Creating Merge Tree
