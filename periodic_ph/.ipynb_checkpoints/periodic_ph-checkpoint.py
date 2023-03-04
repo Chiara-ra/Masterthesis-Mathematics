@@ -20,7 +20,7 @@ class PeriodicPersistence:
         
         self.groups = None
         self.pairs  = None
-        self.evolution = None
+        self.copy_monomial_events = None
         self.int2cont = None
         
     def calculate_pph(self):
@@ -35,7 +35,7 @@ class PeriodicPersistence:
         self.N = len(simplex_objects[0])
         self.int2cont = tac.int2cont(torus_filtration)
         self.groups, self.pairs = tph.PH(torus_filtration, simplex_objects)
-        self.evolution = lambda0.Lambda_0_evolution(torus_filtration, self.N, self.pairs, self.trafo_matrix);
+        self.copy_monomial_events = lambda0.Lambda_0_evolution(torus_filtration, self.N, self.pairs, self.trafo_matrix);
 
         
     def describe_evolution(self):
@@ -49,8 +49,8 @@ class PeriodicPersistence:
 
     def describe_component_evolution(self, comp):
         
-        for i in range(len(self.evolution[comp])):
-            state = self.evolution[comp][i]
+        for i in range(len(self.copy_monomial_events[comp])):
+            state = self.copy_monomial_events[comp][i]
             if isinstance(state, lambda0.StaticSublattice):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
@@ -69,12 +69,12 @@ Component {state.old_component} merged to component {state.new_component}.
 
     def plot_evolution(self, cont_timesteps = True, width=5, height=7):
         if cont_timesteps:
-            merge_tree.plot_mergetree(self.evolution, 
+            merge_tree.plot_mergetree(self.copy_monomial_events, 
                            continuous = self.int2cont, 
                            width=width, 
                            height=height)
         else:
-            merge_tree.plot_mergetree(self.evolution, 
+            merge_tree.plot_mergetree(self.copy_monomial_events, 
                            continuous = None, 
                            width=width, 
                            height=height)
