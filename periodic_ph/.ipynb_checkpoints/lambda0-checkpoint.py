@@ -56,7 +56,7 @@ class Merger:
         self.crossing_vector_list = cv_list
     
     
-class StaticSublattice:
+class MonomialChange:
     def __init__(self, time, component, cv_list, basis_matrix, dim, det_abs, det_rel):
         self.time_index = time
         self.component = component
@@ -186,7 +186,7 @@ class PairAddition:
             
     def conditional_new_sublattice(self, past_comp_evolution, cv_list):
         if self.check_sublattice_change(past_comp_evolution[-1]):
-            past_comp_evolution.append(StaticSublattice(self.time_index, 
+            past_comp_evolution.append(MonomialChange(self.time_index, 
                                                         self.component, 
                                                         cv_list, 
                                                         self.basis_matrix, 
@@ -206,9 +206,9 @@ def Lambda_0_evolution(p_filt, N, persistence_pairs, trafo_matrix):
     Takes filtration data (p_filt of torus filtration data, N number of initial vertices, 
     persistence_pairs and trafo_matrix dependent on initial cell) and returns Lambda0_list,
     which contains one sublist for each initial vertex (component), made up of Merger and 
-    StaticSublattice objects, where each one corresponds to an event in the lifespan of that component. 
+    MonomialChange objects, where each one corresponds to an event in the lifespan of that component. 
     """
-    Lambda0_list = [[StaticSublattice(0, 
+    Lambda0_list = [[MonomialChange(0, 
                                       component, 
                                       [], 
                                       np.zeros((3,3),dtype=np.int32), 

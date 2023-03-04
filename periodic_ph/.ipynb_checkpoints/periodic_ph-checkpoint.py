@@ -51,7 +51,7 @@ class PeriodicPersistence:
         
         for i in range(len(self.copy_monomial_events[comp])):
             state = self.copy_monomial_events[comp][i]
-            if isinstance(state, lambda0.StaticSublattice):
+            if isinstance(state, lambda0.MonomialChange):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
 dimension = {state.dim}

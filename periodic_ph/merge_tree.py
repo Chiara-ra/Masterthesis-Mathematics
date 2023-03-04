@@ -67,7 +67,7 @@ def extract_mergers_from_branch(branch):
     return [event for event in branch if isinstance(event, lambda0.Merger)]
 
 def extract_sublattice_changes_from_branch(branch):
-    return [event for event in branch if isinstance(event, lambda0.StaticSublattice)]
+    return [event for event in branch if isinstance(event, lambda0.MonomialChange)]
  
 def extract_mergers_global(data):
     mergers = [extract_mergers_from_branch(branch) for branch in data]
@@ -120,7 +120,7 @@ def plot_branch(component, ax, merge_data, data, order, continuous):
         
         # annotations
         if ((event.det_rel != det_rel) or (event.dim != dim) 
-            and isinstance(event, lambda0.StaticSublattice)):
+            and isinstance(event, lambda0.MonomialChange)):
             event_time   = conditional_int2cont(event.time_index, continuous)
             # tick
             ax.plot([x1, x1+tick_length], [event_time, event_time], "black")
