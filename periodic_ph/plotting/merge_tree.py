@@ -107,13 +107,14 @@ def plot_branch(component, ax, merge_data, data, order, continuous):
         age *= 1.1
     
     tick_length = 0.2
+    tick_setoff = 0.05
     
     t0 = 0
     dim = 0
     det_rel = 1
     colour = colour_lookup()[0]
     
-    ax.plot([x1, x1+tick_length], [0, 0], "black")
+    ax.plot([x1+tick_setoff, x1+tick_setoff+tick_length], [0, 0], "black")
     ax.annotate(f"1.00 R^3", (x1 + 3/2*tick_length, 0))
     
     for event in data[component]:
@@ -123,7 +124,7 @@ def plot_branch(component, ax, merge_data, data, order, continuous):
             and isinstance(event, lambda0.MonomialChange)):
             event_time   = conditional_int2cont(event.time_index, continuous)
             # tick
-            ax.plot([x1, x1+tick_length], [event_time, event_time], "black")
+            ax.plot([x1+tick_setoff, x1+tick_setoff+tick_length], [event_time, event_time], "black")
             
             # label
             if isinstance(event.det_rel, sp.core.mul.Mul):
