@@ -178,7 +178,7 @@ def calc_cc(simplex_objects):
         
     for n in range(0,N0):
         comp_list = [None if x == -1 else x for x in component_evolution[n,:]]
-        simplex_objects[0][n].create_cc(comp_list) # assign cc lists to vertices
+        simplex_objects[0][n].component = comp_list # assign cc lists to vertices
         
 
         

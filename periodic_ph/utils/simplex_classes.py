@@ -34,9 +34,6 @@ class Simplex0D(Simplex):
         # self.component is List of 0-simplices in form of int_filt values
         # Make .component a method, not something that is initialised right at the beginning
 
-    def create_cc(self, cc_list):
-        self.component = cc_list
-        
     def transf_coord(self, a,b,c):
         self.coords = [self.coords[0]*a,self.coords[1]*b,self.coords[2]*c]
 
