@@ -201,9 +201,9 @@ class PairAddition:
 
     
     
-def Lambda_0_evolution(p_filt, N, persistence_pairs, trafo_matrix):
+def Lambda_0_evolution(filt_len, N, persistence_pairs, trafo_matrix):
     """
-    Takes filtration data (p_filt of torus filtration data, N number of initial vertices, 
+    Takes filtration data (filt_len length of torus filtration, N number of initial vertices, 
     persistence_pairs and trafo_matrix dependent on initial cell) and returns Lambda0_list,
     which contains one sublist for each initial vertex (component), made up of Merger and 
     MonomialChange objects, where each one corresponds to an event in the lifespan of that component. 
@@ -218,7 +218,7 @@ def Lambda_0_evolution(p_filt, N, persistence_pairs, trafo_matrix):
                     for component in range(N)]
     
                         
-    for t in range(len(p_filt)):
+    for t in range(filt_len):
         # search for pair that acts at time t
         for pair in persistence_pairs:
             pair_addition = PairAddition(pair, t, trafo_matrix)

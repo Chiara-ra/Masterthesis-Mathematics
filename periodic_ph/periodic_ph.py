@@ -35,7 +35,7 @@ class PeriodicPersistence:
         self.N = len(simplex_objects[0])
         self.int2cont = tac.int2cont(torus_filtration)
         self.groups, self.pairs = tph.PH(torus_filtration, simplex_objects)
-        self.copy_monomial_events = lambda0.Lambda_0_evolution(torus_filtration, self.N, self.pairs, self.trafo_matrix);
+        self.copy_monomial_events = lambda0.Lambda_0_evolution(len(torus_filtration), self.N, self.pairs, self.trafo_matrix);
 
         
     def describe_evolution(self):
