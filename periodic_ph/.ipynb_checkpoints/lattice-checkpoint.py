@@ -76,16 +76,17 @@ def L31_parallel_vectors(basis, u):
 
 
 
-
-def project(projector, projectee):
-    return projectee - projectee.dot(projector)/projector.dot(projector) * projector
-
-
-def proj_basis(basis, u):
-    l =[]
-    for i in range(len(u)):
-        l.append(project(u, basis[:,i])[:])
-    return sp.Matrix(l).T
+def orthogonal_projection(vectors, projector):
+    r"""
+    Projects vectors in sympy matrix 'vectors' orthogonaly onto 
+    the orthogonal plane defined by the vector 'projector'.
+    """
+    projected_vectors =[]
+    for i in range(vectors.shape[1]):
+        projectee = vectors[:,i]
+        projected_vector = projectee - (projectee.dot(projector)/projector.dot(projector))*projector
+        projected_vectors.append(projected_vector[:])
+    return sp.Matrix(projected_vectors).T
 
     
 
@@ -141,16 +142,14 @@ def proj2induct_2d(Pv,u):
     Pv_2d = skip_corr_coord(Pv,u)
     
     # search for vector to make new "extra"
-    for i in range(4): #this just remember the variable "i"
+    for i in range(3): #this just remember the variable "i"
         ind = [(i+1)%3,(i+2)%3]
         if Pv_2d[:,ind].det() != 0:
             true_i=i
             break
         
-        if i==3: # this is outside of range, meaning no subset is basis
+        elif i==2: # this is outside of range, meaning no subset is basis
             print("something went wrong! No linear ind. subset found.")
-            print(Pv)
-            print(Pv_2d)
             """
             !!!!!
             Put in Real Error Message
@@ -231,7 +230,7 @@ def common_superlattice_3d(basis_np, u_np):
     v, coeff, u_coeff = L31_parallel_vectors(basis,u)
     
     # project basis to v_orth
-    Pbasis = proj_basis(basis,v)
+    Pbasis = orthogonal_projection(basis,v)
     # If vector in P(basis) is 0, then original vector is parallel to u  
     # Pick gcd of both, which is be v.
     for i in range(3):
@@ -245,7 +244,7 @@ def common_superlattice_3d(basis_np, u_np):
             Pbasis_2d, u_2d, u_2d_index, v_2d, v_2d_coeff = proj2induct_2d(Pbasis,v) 
             
             # project basis_2d to v_2d_orth
-            PPbasis = proj_basis(Pbasis_2d,v_2d)
+            PPbasis = orthogonal_projection(Pbasis_2d,v_2d)
             
             # calculate gcd of projected vectors
             x, y = gcd_of_collinear_vectors(PPbasis)
@@ -292,7 +291,7 @@ def common_superlattice_2d(basis_np, u_np):
     v, coeff, coeff_u = L31_parallel_vectors(basis, u)
     
     # project basis to v_orth
-    Pbasis = proj_basis(basis,v)
+    Pbasis = orthogonal_projection(basis,v)
     
 
     # calculate gcd of projected vectors
