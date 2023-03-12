@@ -216,7 +216,7 @@ def conv_sp2np(matrix):
 
 
 
-def common_superlattice_3d(basis_np,u_np, p=False):
+def common_superlattice_3d(basis_np,u_np):
     """
     Takes a 3x3 numpy matrix containing an integer basis,
     as well as an additional numpy vector u.
@@ -269,7 +269,7 @@ def common_superlattice_3d(basis_np,u_np, p=False):
     
     
     
-def common_superlattice_2d(basis_np,u_np, p=False):
+def common_superlattice_2d(basis_np,u_np):
     """
     Takes a 2x2 or 3x2 numpy matrix containing an integer spanning set,
     as well as an additional numpy vector u.
@@ -311,7 +311,7 @@ def common_superlattice_2d(basis_np,u_np, p=False):
 
 
 
-def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
+def reduce_spanning_set_3d(old_vecs, new_vec):
     """
     Takes in 3 dim vectors encoded as numpy integer vectors in list old_vecs
     and a 3 dim integer vector as numpy integer vector new_vec.
@@ -376,7 +376,7 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
                 span_set = old_vecs
             else:
                 # if new_vec lies in span of {vec1, vec2}, use lemma
-                span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
+                span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec)
                 span_set.append(span_set_mx[:,0])
                 span_set.append(span_set_mx[:,1])
         
@@ -387,8 +387,8 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
             span_set.append(new_vec)
         
     elif l==3:
-        # use common_superlattice()
-        span_set_mx = common_superlattice_3d(old_vecs_mx,new_vec,p=p)
+        # use common_superlattice_3d()
+        span_set_mx = common_superlattice_3d(old_vecs_mx,new_vec)
         span_set.append(span_set_mx[:,0])
         span_set.append(span_set_mx[:,1])
         span_set.append(span_set_mx[:,2])
@@ -405,7 +405,7 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
 
 
 
-def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
+def reduce_spanning_set_2d(old_vecs, new_vec):
     """
     Takes in 2 dim vectors encoded as numpy integer vectors in list old_vecs
     and a 2 dim integer vector as numpy integer vector new_vec.
@@ -444,7 +444,7 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
         vec1 = old_vecs[0]
         vec2 = old_vecs[1]
         # use lemma
-        span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec,p=p)
+        span_set_mx = common_superlattice_2d(old_vecs_mx, new_vec)
         span_set.append(span_set_mx[:,0])
         span_set.append(span_set_mx[:,1])
             
