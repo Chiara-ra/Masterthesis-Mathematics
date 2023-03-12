@@ -65,7 +65,7 @@ def L31_parallel_vectors(basis, u):
             num1 = v[i]
             num2 = u[i]
             denom = num1.q*num2.q
-            new_gcd, a, b = gcdExtended(num1*denom,num2*denom)
+            new_gcd, a, b = gcdExtended(num1*denom, num2*denom)
             x = new_gcd / sp.sympify(num1.p*num2.q)
             v = v/num1*new_gcd
             coeff = coeff * a
@@ -185,9 +185,9 @@ def nonzero_entry(vec):
 
 
 
-def gcd_of_2dvecs(vec_mx):
+def gcd_of_collinear_vectors(vec_mx):
     """
-    Takes two 2d sympy vectors in form of a matrix and returns their gcd, 
+    Takes two sympy column vectors from sympy matrix and returns their gcd, 
     as well as the coefficients to build the gcd
     
     vec_mx       ... 2x2 matrix containing two column-vectors
@@ -203,8 +203,8 @@ def gcd_of_2dvecs(vec_mx):
 
     a = vec_mx[i,0]*denoms
     b = vec_mx[i,1]*denoms
-    c, x,y = gcdExtended(a,b)
-    return x,y
+    c, x, y = gcdExtended(a, b)
+    return x, y
 
 
 
@@ -216,7 +216,7 @@ def conv_sp2np(matrix):
 
 
 
-def common_superlattice_3d(basis_np,u_np):
+def common_superlattice_3d(basis_np, u_np):
     """
     Takes a 3x3 numpy matrix containing an integer basis,
     as well as an additional numpy vector u.
@@ -248,7 +248,7 @@ def common_superlattice_3d(basis_np,u_np):
             PPbasis = proj_basis(Pbasis_2d,v_2d)
             
             # calculate gcd of projected vectors
-            x,y = gcd_of_2dvecs(PPbasis)
+            x, y = gcd_of_collinear_vectors(PPbasis)
             
 
             # calculate basis of 3d space
@@ -269,7 +269,7 @@ def common_superlattice_3d(basis_np,u_np):
     
     
     
-def common_superlattice_2d(basis_np,u_np):
+def common_superlattice_2d(basis_np, u_np):
     """
     Takes a 2x2 or 3x2 numpy matrix containing an integer spanning set,
     as well as an additional numpy vector u.
@@ -296,7 +296,7 @@ def common_superlattice_2d(basis_np,u_np):
     
 
     # calculate gcd of projected vectors
-    x,y = gcd_of_2dvecs(Pbasis)
+    x, y = gcd_of_collinear_vectors(Pbasis)
     # calculate new minimal spanning set
     new_vec1 = basis_np[:,0]*x + basis_np[:,1]*y
     new_vec2 = coeff[0]*basis_np[:,0] + coeff[1]*basis_np[:,1] + coeff_u*u_np
@@ -306,6 +306,15 @@ def common_superlattice_2d(basis_np,u_np):
     return span_set.astype(np.int32)
     
     
+def common_superlattice_1d(vector1, vector2):
+        """
+        Takes vector1, which is basis of 1-dim lattice, and additional collinear vector2.
+        Returns a new vector which spans the common suplattice.
+        """
+        vector_matrix  = sp.Matrix([vector1, vector2]).T
+        x, y = gcd_of_collinear_vectors(vector_matrix)
+        return x*vector1 + y*vector2
+
 
 
 
@@ -345,12 +354,8 @@ def reduce_spanning_set_3d(old_vecs, new_vec):
         
         
         if abs(la.norm(np.cross(vec1,new_vec))) < 0.1:
-            # if vec1 and new_vec are collinear, take gcd
-            ind = np.argmax(np.abs(vec1))
-            a = vec1[ind]
-            b = new_vec[ind]
-            gcd_ab, x, y = gcdExtended(a, b)
-            span_set.append(x*vec1 + y*new_vec)
+            gcd_vector = common_superlattice_1d(vec1, new_vec)
+            span_set.append(gcd_vector)
     
         
         else:
