@@ -264,14 +264,6 @@ def common_superlattice_3d(basis_np,u_np, p=False):
 
     new_basis = sp.Matrix([base1_3d[:], base2_3d[:], base3_3d[:]]).T
     
-    if p:
-        print("Final basis:")
-        sp.pprint(new_basis)
-
-        print("Original spanning set:")
-        sp.pprint(basis)
-        sp.pprint(u)
-    
     return conv_sp2np(new_basis)
     
     
@@ -346,20 +338,13 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
         span_set = old_vecs
     
     elif l==0:
-        if p:
-            print("case 1: old_vecs = []")
-            
         span_set.append(new_vec)
     
     elif l==1:
-        if p:
-            print("case 2: old_vecs = [vec1]")
         vec1 = old_vecs[0]
         
         
         if abs(la.norm(np.cross(vec1,new_vec))) < 0.1:
-            if p:
-                print("vec1 and new_vec are collinear")
             # if vec1 and new_vec are collinear, take gcd
             ind = np.argmax(np.abs(vec1))
             a = vec1[ind]
@@ -370,19 +355,13 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
         
         else:
             # else take [vec1, new_vec]
-            if p:
-                print("vec1 and new_vec are linearly independant")
             span_set.append(vec1)
             span_set.append(new_vec)
         
     elif l==2:
-        if p:
-            print("case 3: old_vecs = [vec1, vec2]")
         vec1 = old_vecs[0]
         vec2 = old_vecs[1]
         if abs(la.det(all_vecs_mx)) < 0.1:
-            if p:
-                print("new_vec lies in real span of vec1 and vec2")
             
             from sympy.abc import a, b
             coeffs = sp.solvers.solvers.solve(vec1*a+vec2*b-new_vec,a,b)
@@ -402,16 +381,12 @@ def reduce_spanning_set_3d(old_vecs, new_vec, p=False):
                 span_set.append(span_set_mx[:,1])
         
         else:
-            if p:
-                print("vec1, vec2 and new_vec are linearly independant")
             # else take [vec1, vec2, new_vec]
             span_set.append(vec1)
             span_set.append(vec2)
             span_set.append(new_vec)
         
     elif l==3:
-        if p:
-            print("case 4: old_vecs = [vec1, vec2, vec3]")
         # use common_superlattice()
         span_set_mx = common_superlattice_3d(old_vecs_mx,new_vec,p=p)
         span_set.append(span_set_mx[:,0])
@@ -445,20 +420,13 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
     span_set = []
     
     if l==0:
-        if p:
-            print("case 1: old_vecs = []")
-            
         span_set.append(new_vec)
     
     elif l==1:
-        if p:
-            print("case 2: old_vecs = [vec1]")
         vec1 = old_vecs[0]
         
         
         if abs(la.det(all_vecs_mx)) < 0.1:
-            if p:
-                print("vec1 and new_vec are collinear")
             # if vec1 and new_vec are collinear, take gcd
             ind = np.argmax(np.abs(vec1))
             a = vec1[ind]
@@ -469,15 +437,10 @@ def reduce_spanning_set_2d(old_vecs, new_vec, p=False):
         
         else:
             # else take [vec1, new_vec]
-            if p:
-                print("vec1 and new_vec are linearly independant")
-                
             span_set.append(vec1)
             span_set.append(new_vec)
         
     elif l==2:
-        if p:
-            print("case 3: old_vecs = [vec1, vec2]")
         vec1 = old_vecs[0]
         vec2 = old_vecs[1]
         # use lemma
