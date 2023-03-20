@@ -32,7 +32,8 @@ def lcm(a, b):
 # ------
 
 
-def L31_parallel_vectors(basis, u):
+def find_parallel_primitive(basis, u):
+    # based on lemma 3.1
     # function that takes basis (which generates sublattice Z) and vector v
     # outputs vector u as linear combination of basis elements, which is parallel to v
     # also outputs or at least explicitely calculates the coefficients involved
@@ -100,6 +101,13 @@ def skip_corr_coord(Pv, u):
 
 
 
+def conv_np2sp(array):
+    return sp.Matrix(array)
+
+def conv_sp2np(matrix):
+    return np.array(matrix).astype(np.int32)
+
+
 def skip_coord(vec,n=1):
     """
     Takes in 3-component vector and returns corresponding 2-component vector
@@ -116,7 +124,7 @@ def skip_coord(vec,n=1):
 
 
 
-def lcm_mx(M):
+def lcm_matrix_denominators(M):
     """
     Takes sympy 2x2 matrix with rational coefficients and 
     returns lcm of denominators of all entries
@@ -130,21 +138,18 @@ def lcm_mx(M):
 
 
 
-
-
-def proj2induct_2d(Pv,u):
+def setup_2d_induction(projected_vectors, u):
     """
-    Takes 3x3 sympy matrix with vectors projected to orthogonal complement
-    and returns 
-    - a 2x2 sympy matrix (picks two linearly independant column vectors, skips one coordinate) 
-    - 'additional' vector to perform next orth projection
+    Takes 3x3 sympy matrix with vectors projected to orthogonal complement of u.
+    Skips one coordinate and shuffles vectors to be in the setup "basis + additional vector".
+    Returns skipped vectors and shuffle dictionary. 
     """
-    Pv_2d = skip_corr_coord(Pv,u)
+    projected_vectors_2d = skip_corr_coord(projected_vectors,u)
     
     # search for vector to make new "extra"
     for i in range(3): #this just remember the variable "i"
         ind = [(i+1)%3,(i+2)%3]
-        if Pv_2d[:,ind].det() != 0:
+        if projected_vectors_2d[:,ind].det() != 0:
             true_i=i
             break
         
@@ -154,26 +159,29 @@ def proj2induct_2d(Pv,u):
             !!!!!
             Put in Real Error Message
             """
-    
-    
-    u_2d = Pv_2d[:,true_i]
-    basis_2d = Pv_2d[:,ind]
+    return projected_vectors_2d, {0: ind[0], 1: ind[1], 2: true_i}
+
+def primitive_rational_entries(projected_vectors, re_index):
+    u = projected_vectors[:,re_index[2]]
+    basis = projected_vectors[:,[re_index[0],re_index[1]]]
     
     # determine lcm of denomiators
-    lcm_denom = lcm_mx(Pv_2d)
+    lcm_denom = lcm_matrix_denominators(projected_vectors)
     
     # making stuff integer
-    v_2d, coeff_basis_2d, coeff_u_2d = L31_parallel_vectors(basis_2d*lcm_denom, u_2d*lcm_denom)
-    v_2d /= lcm_denom
+    v, coefficients_basis, coefficient_u = find_parallel_primitive(basis*lcm_denom, u*lcm_denom)
+    v /= lcm_denom
     
 
     # calculate what coefficients of v are in the ORDER OF Pv, not Pv_2d!
-    prim_coeff = [0,0,0]
-    prim_coeff[ind[0]] = coeff_basis_2d[0]
-    prim_coeff[ind[1]] = coeff_basis_2d[1]
-    prim_coeff[true_i] = coeff_u_2d
+    coefficients_primitive = [0,0,0]
+    coefficients_primitive[re_index[0]] = coefficients_basis[0]
+    coefficients_primitive[re_index[1]] = coefficients_basis[1]
+    coefficients_primitive[re_index[2]] = coefficient_u
     
-    return basis_2d, u_2d, true_i, v_2d, prim_coeff
+    return basis, v, coefficients_primitive
+
+
     
 
 def nonzero_entry(vec):
@@ -198,20 +206,13 @@ def gcd_of_collinear_vectors(vec_mx):
     i = nonzero_entry(vec_mx[:,0])
     
     # take lcm of denominators of the i'th entries
-    denoms = lcm_mx(vec_mx[i,:])
+    denoms = lcm_matrix_denominators(vec_mx[i,:])
 
     a = vec_mx[i,0]*denoms
     b = vec_mx[i,1]*denoms
     c, x, y = gcdExtended(a, b)
     return x, y
 
-
-
-def conv_np2sp(array):
-    return sp.Matrix(array)
-
-def conv_sp2np(matrix):
-    return np.array(matrix).astype(np.int32)
 
 
 
@@ -227,43 +228,55 @@ def common_superlattice_3d(basis_np, u_np):
     u = conv_np2sp(u_np)
     
     # caculate primitive of u in superlattice
-    v, coeff, u_coeff = L31_parallel_vectors(basis,u)
+    v, coefficients_basis, u_coefficient = find_parallel_primitive(basis, u)
     
-    # project basis to v_orth
-    Pbasis = orthogonal_projection(basis,v)
-    # If vector in P(basis) is 0, then original vector is parallel to u  
-    # Pick gcd of both, which is be v.
+    # 3d --> 2d
+    # project basis to orthogonal complement of v
+    projected_vectors_3d = orthogonal_projection(basis, v)
+    
+    # If vector in P(vec) is 0, then vec is parallel to u  
+    # Pick gcd of both, which will be v anyway.
+    
+    primitive_parallel_to_basis = False
     for i in range(3):
-        if Pbasis[:,i].norm() == 0:
-            base1_3d = basis[:,(i+1)%3]
-            base2_3d = basis[:,(i+2)%3]
-            break
+        if projected_vectors_3d[:,i].norm() == 0:
+            superlattice_basis_1 = basis[:,(i+1)%3]
+            superlattice_basis_2 = basis[:,(i+2)%3]
+            superlattice_basis_3 = v
+            primitive_parallel_to_basis = True
             
-        elif i==2:
-            # reduce to 2 component vectors and get new basis and new u
-            Pbasis_2d, u_2d, u_2d_index, v_2d, v_2d_coeff = proj2induct_2d(Pbasis,v) 
-            
-            # project basis_2d to v_2d_orth
-            PPbasis = orthogonal_projection(Pbasis_2d,v_2d)
-            
-            # calculate gcd of projected vectors
-            x, y = gcd_of_collinear_vectors(PPbasis)
-            
+    if not primitive_parallel_to_basis:
+        # reduce to 2 component vectors and get new basis and new u
+        projected_vectors_2d, re_index = setup_2d_induction(projected_vectors_3d, u)
 
-            # calculate basis of 3d space
-            base1_3d = basis[:,(u_2d_index+1)%3]*x + basis[:,(u_2d_index+2)%3]*y
+        # find primitive parallel to new u
+        basis_plane, v_plane, coefficients_v_plane = primitive_rational_entries(projected_vectors_2d, re_index)
+
+        # 2d --> 1d
+        # project from plane to line
+        collinear_vectors = orthogonal_projection(basis_plane, v_plane)
+
+        # calculate gcd of projected vectors
+        x, y = gcd_of_collinear_vectors(collinear_vectors)
 
 
-            base2_3d = 0*u # <-- u-component is 0
-            for i in range(3):
-                base2_3d += v_2d_coeff[i] * basis[:,i]
+        # calculate basis of common_superlattice
+        superlattice_basis_1 = x*basis[:,re_index[0]] + y*basis[:,re_index[1]]
+
+
+        superlattice_basis_2 = 0*u # <-- u-component is 0
+        for i in range(3):
+            superlattice_basis_2 += coefficients_v_plane[i]*basis[:,i]
+
+        superlattice_basis_3 = (coefficients_basis[0]*basis[:,0] + 
+                                coefficients_basis[1]*basis[:,1] + 
+                                coefficients_basis[2]*basis[:,2] + 
+                                u_coefficient*u) # = v
+        
+
+    superlattice_basis = sp.Matrix([superlattice_basis_1[:], superlattice_basis_2[:], superlattice_basis_3[:]]).T
     
-    base3_3d = coeff[0]*basis[:,0]+coeff[1]*basis[:,1]+coeff[2]*basis[:,2]+u_coeff*u
-    # is equivalent to: base3_3d=v
-
-    new_basis = sp.Matrix([base1_3d[:], base2_3d[:], base3_3d[:]]).T
-    
-    return conv_sp2np(new_basis)
+    return conv_sp2np(superlattice_basis)
     
     
     
@@ -288,7 +301,7 @@ def common_superlattice_2d(basis_np, u_np):
         u = skip_coord(u,ind)
         basis = sp.Matrix([vec1.T,vec2.T]).T
         
-    v, coeff, coeff_u = L31_parallel_vectors(basis, u)
+    v, coeff, coeff_u = find_parallel_primitive(basis, u)
     
     # project basis to v_orth
     Pbasis = orthogonal_projection(basis,v)
