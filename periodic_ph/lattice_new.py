@@ -80,3 +80,55 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
  
 
 
+
+    
+def common_superlattice_1d(vector1, vector2):
+    """
+    Takes two sympy vectors and returns coefficients of their gcd. 
+    """
+    
+    # look for a non-zero coordinate
+    index = nonzero_entry(vector1)
+    
+    # take least common denominator of the index'th entries
+    lcd = lcd_matrix(sp.Matrix([vector1[index], vector2[index]]))
+
+    a = vector1[index]*lcd
+    b = vector2[index]*lcd
+    x, y = gcdExtended(a, b)
+    return [x, y]
+
+    
+
+def nonzero_entry(vector):
+    for count, value in enumerate(vector):
+        if value != 0:
+            return count
+
+def lcd_matrix(M):
+    """
+    Takes sympy matrix with rational coefficients and 
+    returns lcm of denominators of all entries
+    """
+    lcm_denom = M[0,0].q
+    for entry in M[:]:
+        lcm_denom = lcm(lcm_denom, entry.q)
+    return lcm_denom
+
+
+def gcdExtended(a, b): 
+    # Base Case 
+    if a == 0 :  
+        return b,0,1
+
+    x1, y1 = gcdExtended(b%a, a) 
+
+    # Update x and y using results of recursive 
+    # call 
+    x = y1 - (b//a) * x1 
+    y = x1 
+
+    return x, y
+
+def lcm(a, b):
+    return abs(a*b) // gcd(a, b)
