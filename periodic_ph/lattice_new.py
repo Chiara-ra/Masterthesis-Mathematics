@@ -84,7 +84,7 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
     
 def common_superlattice_1d(vector1, vector2):
     """
-    Takes two sympy vectors and returns coefficients of their gcd. 
+    Takes two sympy vectors (rational or integer) and returns coefficients of their gcd. 
     """
     
     # look for a non-zero coordinate
@@ -132,3 +132,65 @@ def gcdExtended(a, b):
 
 def lcm(a, b):
     return abs(a*b) // gcd(a, b)
+
+
+
+# -----------------------------------------------------
+
+
+
+ 
+    
+def common_superlattice_2d(vector0, vector1, new_vector):
+    """
+    Takes three sympy integer vectors, 
+    the third one lying the the plane defined by the first two.
+    
+    Calculates coefficients of the integer basis spanning 
+    the common superlattice of all three vectors. 
+    """
+    if len(new_vector) == 3:
+        # skip one coordinate
+        index  = np.argmax(np.abs(vector1.cross(vector2)))
+        vector0 =    skip_coordinate(vector0, index)
+        vector1 =    skip_coordinate(vector1, index)
+        new_vector = skip_coordinate(new_vector, index)
+    
+    basis = sp.Matrix([vector0.T,vector1.T]).T
+    primitive, primitive_coeff_basis, primitive_coeff_new_vector = find_parallel_primitive(basis, new_vector)
+    
+    # project basis to v_orth
+    projected_basis = orthogonal_projection(basis, primitive)
+    
+    [x, y] = common_superlattice_1d(projected_basis[:,0], projected_basis[:,1])
+    
+    return [x, y], primitive_coeff_basis + [primitive_coeff_new_vector]
+
+    
+def skip_coordinate(vector, n):
+    """
+    Takes in 3-component vector and returns corresponding 2-component vector
+    given by removing the nth coordinate (n = 0,1,2).
+    """
+    if n == 0:
+        new_vector = [vector[1],vector[2]]
+    elif n == 1:
+        new_vector = [vector[0],vector[2]]
+    elif n == 2:
+        new_vector = [vector[0],vector[1]]
+    
+    return sp.Matrix(new_vec)
+
+
+
+def orthogonal_projection(vectors, projector):
+    r"""
+    Projects vectors in sympy matrix 'vectors' orthogonaly onto 
+    the orthogonal plane defined by the vector 'projector'.
+    """
+    projected_vectors =[]
+    for i in range(vectors.shape[1]):
+        projectee = vectors[:,i]
+        projected_vector = projectee - (projectee.dot(projector)/projector.dot(projector))*projector
+        projected_vectors.append(projected_vector[:])
+    return sp.Matrix(projected_vectors).T
