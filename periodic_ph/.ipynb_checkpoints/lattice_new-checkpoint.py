@@ -144,7 +144,7 @@ def lcm(a, b):
 def common_superlattice_2d(vector0, vector1, new_vector):
     """
     Takes three sympy integer vectors, 
-    the third one lying the the plane defined by the first two.
+    the third one lying in the plane defined by the first two.
     
     Calculates coefficients of the integer basis spanning 
     the common superlattice of all three vectors. 
@@ -164,7 +164,7 @@ def common_superlattice_2d(vector0, vector1, new_vector):
     
     [x, y] = common_superlattice_1d(projected_basis[:,0], projected_basis[:,1])
     
-    return [x, y], primitive_coeff_basis + [primitive_coeff_new_vector]
+    return [x, y, 0], primitive_coeff_basis + [primitive_coeff_new_vector]
 
     
 def skip_coordinate(vector, n):
@@ -194,3 +194,126 @@ def orthogonal_projection(vectors, projector):
         projected_vector = projectee - (projectee.dot(projector)/projector.dot(projector))*projector
         projected_vectors.append(projected_vector[:])
     return sp.Matrix(projected_vectors).T
+
+
+
+
+def find_parallel_primitive(basis, u):
+    """
+    Takes a basis of integer sympy vectors and an additional sympy vector u
+    Outputs the primitive v in the lattice parallel to u and its coefficients in the basis and u.
+    """
+    # based on lemma 3.1
+    G = basis
+    Gi = G**(-1)
+    denom_list = []
+    p = 1
+    for entry in Gi:
+        if entry.q not in denom_list:
+            denom_list.append(entry.q)
+            p *= entry.q
+    
+    up = p*Gi*u
+    v = G*up
+    if len(u)==3:
+        v = v / gcd3(up[0],up[1],up[2])
+        coeff = up / gcd3(up[0],up[1],up[2]) #dividng by gcd of coefficients gives us the shortest parallel vector in the span of the original basis
+    if len(u)==2:
+        v = v / gcd(up[0],up[1])
+        coeff = up / gcd(up[0],up[1])
+    
+    # to find shortest vector in the span of the new basis (four vectors), 
+    # we find out the ratios of the two vectors 
+    # get them to integer by multiplying with denominators
+    # calculate the gcd of the resulting numbers
+    # then divide the gcd (or the vector associated to it) by the denominator again
+    for i in range(len(u)):
+        if u[i]!=0:
+            num1 = v[i]
+            num2 = u[i]
+            denom = num1.q*num2.q
+            new_gcd, a, b = gcdExtended(num1*denom, num2*denom)
+            x = new_gcd / sp.sympify(num1.p*num2.q)
+            v = v/num1*new_gcd
+            coeff = coeff * a
+            u_coeff = b
+            break
+    
+    return v, coeff, u_coeff
+
+# -----------------------------------------------------
+
+
+def common_superlattice_3d(vector0, vector1, vector2, new_vector):
+    """
+    Takes three linearly independent sympy integer vectors, 
+    with a fourth additional one whose not an integer combination of the others.
+    
+    Calculates coefficients of the integer basis spanning 
+    the common superlattice of all four vectors. 
+    """
+    basis = sp.Matrix([vector0.T, vector1.T, vector2.T]).T
+    v, v_coeff_basis, v_coeff_new_vector = find_parallel_primitive(basis, new_vector)
+    projected_vectors_3d = orthogonal_projection(basis, new_vector)
+    
+    basis0_coeff = [0,0,0,0]
+    basis1_coeff = [0,0,0,0]
+    basis2_coeff = [0,0,0,0]
+    
+    primitive_parallel_to_basis = False
+    for i in range(3):
+        if projected_vectors_3d[:,i].norm() == 0:
+            basis0_coeff[(i+1)%3] = 1
+            basis1_coeff[(i+2)%3] = 1
+            basis2_coeff[3] = 1
+            primitive_parallel_to_basis = True
+            
+    if not primitive_parallel_to_basis:
+        # reduce to 2 component vectors and get new basis and new "new vector"
+        vector0_2d, vector1_2d, new_vector_2d, re_index = setup_2d_induction(projected_vectors_3d, new_vector)
+        
+        basis0_coeff_induct, basis1_coeff_induct = common_superlattice_2d(vector0_2d, vector1_2d, new_vector_2d)
+        
+        basis0_coeff[re_index[0]] = basis0_coeff_induct[0]
+        basis0_coeff[re_index[1]] = basis0_coeff_induct[1]
+        basis0_coeff[re_index[2]] = basis0_coeff_induct[2]
+        # new_vector component stays 0
+        
+        basis1_coeff[re_index[0]] = basis1_coeff_induct[0]
+        basis1_coeff[re_index[1]] = basis1_coeff_induct[1]
+        basis1_coeff[re_index[2]] = basis1_coeff_induct[2]
+        # new_vector component stays 0 
+        
+        basis2_coeff =  v_coeff_basis + [v_coeff_new_vector]
+
+    return basis1_coeff, basis2_coeff, basis3_coeff
+    
+    
+def setup_2d_induction(projected_vectors, u):
+    """
+    Takes 3x3 sympy matrix with vectors projected to orthogonal complement of u.
+    Skips one coordinate and shuffles vectors to be in the setup "basis + additional vector".
+    Returns skipped vectors and shuffle dictionary. 
+    """
+    projected_vectors_2d = skip_corr_coord(projected_vectors,u)
+    
+    # search for vector to make new "extra"
+    for i in range(3): #this just remember the variable "i"
+        ind = [(i+1)%3,(i+2)%3]
+        if projected_vectors_2d[:,ind].det() != 0:
+            true_i=i
+            break
+        
+        elif i==2: # this is outside of range, meaning no subset is basis
+            raise ValueError("No linearly independant subset found in set of projected vectors.")
+    
+    # determine lcm of denomiators
+    lcm_denom = lcm_matrix_denominators(projected_vectors_2d)
+    
+    new_vector = projected_vectors[:,true_i]*lcm_denom
+    vector0 = projected_vectors[:,ind[0]]*lcm_denom
+    vector1 = projected_vectors[:,ind[1]]*lcm_denom   
+                             
+    return vector0, vector1, new_vector, {0: ind[0], 1: ind[1], 2: true_i}
+
+
