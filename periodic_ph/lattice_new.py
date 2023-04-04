@@ -8,6 +8,12 @@ The output is again a list of 3-coordinate numpy arrays.
 """
 
 
+# libraries
+import numpy as np
+import numpy.linalg as la
+from math import gcd
+import sympy as sp
+
 
 
 def reduce_spanning_set_3d(old_vectors, new_vector):
@@ -43,6 +49,7 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
             from sympy.solvers.solvers import solve
             linear_equation = old_vectors[0]*a + old_vectors[1]*b - new_vector
             solution = solve(linear_equation, a, b)
+            combination_integer = False
             try:
                 if solution[a].q == 1 and solution[b].q == 1:
                     combination_integer = True
@@ -52,7 +59,7 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
             if combination_integer:
                 spanning_set = old_vectors
             else:
-                [x0, y0, z0], [x1, y1, z0] = common_superlattice_2d(sp.Matrix(old_vectors[0]), 
+                [x0, y0, z0], [x1, y1, z1] = common_superlattice_2d(sp.Matrix(old_vectors[0]), 
                                                                     sp.Matrix(old_vectors[1]), 
                                                                     sp.Matrix(new_vector))
                 spanning_set = [x0*old_vectors[0] + y0*old_vectors[1] + z0*new_vector,
@@ -63,19 +70,21 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
     
     elif len(old_vectors) == 3:
         coefficients = common_superlattice_3d(sp.Matrix(old_vectors[0]), 
-                                                        sp.Matrix(old_vectors[1]), 
-                                                        sp.Matrix(old_vectors[2])
-                                                        sp.Matrix(new_vector))
+                                              sp.Matrix(old_vectors[1]), 
+                                              sp.Matrix(old_vectors[2]),
+                                              sp.Matrix(new_vector))
         spanning_set = []
         for i in range(3):
             vector = coefficients[i][3]*new_vector
             for j in range(3):
-                vector = coefficients[i][j]*old_vectors[j]
+                vector = vector + coefficients[i][j]*old_vectors[j]
             spanning_set.append(vector)
                 
     else:
         raise ValueError("Too many vectors in list of previous spanning set (old_vectors).")
         
+    for i, vector in enumerate(spanning_set):
+        spanning_set[i] = vector.astype(np.int32)
     return spanning_set
  
 
@@ -104,6 +113,7 @@ def nonzero_entry(vector):
     for count, value in enumerate(vector):
         if value != 0:
             return count
+    return 0 # in case the vector is the zero vector
 
 def lcd_matrix(M):
     """
@@ -119,12 +129,11 @@ def lcd_matrix(M):
 def gcdExtended(a, b): 
     # Base Case 
     if a == 0 :  
-        return b,0,1
+        return 0,1
 
     x1, y1 = gcdExtended(b%a, a) 
 
-    # Update x and y using results of recursive 
-    # call 
+    # Update x and y using results of recursive call 
     x = y1 - (b//a) * x1 
     y = x1 
 
@@ -151,7 +160,7 @@ def common_superlattice_2d(vector0, vector1, new_vector):
     """
     if len(new_vector) == 3:
         # skip one coordinate
-        index  = np.argmax(np.abs(vector1.cross(vector2)))
+        index  = np.argmax(np.abs(vector0.cross(vector1)))
         vector0 =    skip_coordinate(vector0, index)
         vector1 =    skip_coordinate(vector1, index)
         new_vector = skip_coordinate(new_vector, index)
@@ -161,10 +170,8 @@ def common_superlattice_2d(vector0, vector1, new_vector):
     
     # project basis to v_orth
     projected_basis = orthogonal_projection(basis, primitive)
-    
     [x, y] = common_superlattice_1d(projected_basis[:,0], projected_basis[:,1])
-    
-    return [x, y, 0], primitive_coeff_basis + [primitive_coeff_new_vector]
+    return [x, y, 0], list(primitive_coeff_basis) + [primitive_coeff_new_vector]
 
     
 def skip_coordinate(vector, n):
@@ -179,7 +186,7 @@ def skip_coordinate(vector, n):
     elif n == 2:
         new_vector = [vector[0],vector[1]]
     
-    return sp.Matrix(new_vec)
+    return sp.Matrix(new_vector)
 
 
 
@@ -196,6 +203,8 @@ def orthogonal_projection(vectors, projector):
     return sp.Matrix(projected_vectors).T
 
 
+def gcd3(a,b,c):
+    return gcd(gcd(a,b),c)
 
 
 def find_parallel_primitive(basis, u):
@@ -232,7 +241,8 @@ def find_parallel_primitive(basis, u):
             num1 = v[i]
             num2 = u[i]
             denom = num1.q*num2.q
-            new_gcd, a, b = gcdExtended(num1*denom, num2*denom)
+            a, b = gcdExtended(num1*denom, num2*denom)
+            new_gcd = int(a*num1*denom + b*num2*denom)
             x = new_gcd / sp.sympify(num1.p*num2.q)
             v = v/num1*new_gcd
             coeff = coeff * a
@@ -258,14 +268,12 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
     
     basis0_coeff = [0,0,0,0]
     basis1_coeff = [0,0,0,0]
-    basis2_coeff = [0,0,0,0]
     
     primitive_parallel_to_basis = False
     for i in range(3):
         if projected_vectors_3d[:,i].norm() == 0:
             basis0_coeff[(i+1)%3] = 1
             basis1_coeff[(i+2)%3] = 1
-            basis2_coeff[3] = 1
             primitive_parallel_to_basis = True
             
     if not primitive_parallel_to_basis:
@@ -284,10 +292,35 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
         basis1_coeff[re_index[2]] = basis1_coeff_induct[2]
         # new_vector component stays 0 
         
-        basis2_coeff =  v_coeff_basis + [v_coeff_new_vector]
+    basis2_coeff =  list(v_coeff_basis) + [v_coeff_new_vector]
 
-    return basis1_coeff, basis2_coeff, basis3_coeff
+    return basis0_coeff, basis1_coeff, basis2_coeff
     
+    
+    
+def skip_coord(vector,n=1):
+    """
+    Takes in 3-component vector and returns corresponding 2-component vector
+    given by removing the nth coordinate (n = 0,1,2).
+    """
+    if n == 0:
+        new_vector = [vector[1],vector[2]]
+    elif n == 1:
+        new_vector = [vector[0],vector[2]]
+    elif n == 2:
+        new_vector = [vector[0],vector[1]]
+    
+    return sp.Matrix(new_vector)
+
+
+def skip_corr_coord(matrix, skipping_direction):
+    ind = np.argmax(np.abs(skipping_direction))
+    column1_skipped = skip_coord(matrix[:,0],ind)
+    column2_skipped = skip_coord(matrix[:,1],ind)
+    column3_skipped = skip_coord(matrix[:,2],ind)
+    
+    return sp.Matrix([column1_skipped[:], column2_skipped[:], column3_skipped[:]]).T
+
     
 def setup_2d_induction(projected_vectors, u):
     """
@@ -308,7 +341,7 @@ def setup_2d_induction(projected_vectors, u):
             raise ValueError("No linearly independant subset found in set of projected vectors.")
     
     # determine lcm of denomiators
-    lcm_denom = lcm_matrix_denominators(projected_vectors_2d)
+    lcm_denom = lcd_matrix(projected_vectors_2d)
     
     new_vector = projected_vectors[:,true_i]*lcm_denom
     vector0 = projected_vectors[:,ind[0]]*lcm_denom

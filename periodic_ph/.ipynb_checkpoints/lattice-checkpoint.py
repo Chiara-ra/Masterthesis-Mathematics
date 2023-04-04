@@ -267,7 +267,7 @@ def common_superlattice_3d(basis_np, u_np):
         superlattice_basis_2 = 0*u # <-- u-component is 0
         for i in range(3):
             superlattice_basis_2 += coefficients_v_plane[i]*basis[:,i]
-
+            
         superlattice_basis_3 = (coefficients_basis[0]*basis[:,0] + 
                                 coefficients_basis[1]*basis[:,1] + 
                                 coefficients_basis[2]*basis[:,2] + 
@@ -300,13 +300,10 @@ def common_superlattice_2d(basis_np, u_np):
         vec2 = skip_coord(basis[:,1],ind)
         u = skip_coord(u,ind)
         basis = sp.Matrix([vec1.T,vec2.T]).T
-        
+   
     v, coeff, coeff_u = find_parallel_primitive(basis, u)
-    
     # project basis to v_orth
     Pbasis = orthogonal_projection(basis,v)
-    
-
     # calculate gcd of projected vectors
     x, y = gcd_of_collinear_vectors(Pbasis)
     # calculate new minimal spanning set
@@ -379,16 +376,15 @@ def reduce_spanning_set_3d(old_vecs, new_vec):
         vec1 = old_vecs[0]
         vec2 = old_vecs[1]
         if abs(la.det(all_vecs_mx)) < 0.1:
-            
             from sympy.abc import a, b
             coeffs = sp.solvers.solvers.solve(vec1*a+vec2*b-new_vec,a,b)
             is_int_comb = False
-            for key,value in coeffs.items():
-                try:
-                    if value.q == 1:
-                        is_int_comb = True
-                except:
-                    pass
+            try:
+                if coeffs[a].q == 1 and coeffs[b].q == 1:
+                    is_int_comb = True
+            except:
+                pass
+            
             if is_int_comb:
                 span_set = old_vecs
             else:
