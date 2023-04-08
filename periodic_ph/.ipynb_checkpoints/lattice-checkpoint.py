@@ -14,6 +14,8 @@ import numpy.linalg as la
 from math import gcd
 import sympy as sp
 
+from sympy.abc import a, b, c
+from sympy.solvers.solvers import solve
 
 
 def reduce_spanning_set_3d(old_vectors, new_vector):
@@ -45,16 +47,8 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
         spanned_volume = abs(la.det(all_vectors_matrix))
         
         if spanned_volume < .5: #coplanar
-            from sympy.abc import a, b
-            from sympy.solvers.solvers import solve
             linear_equation = old_vectors[0]*a + old_vectors[1]*b - new_vector
-            solution = solve(linear_equation, a, b)
-            combination_integer = False
-            try:
-                if solution[a].q == 1 and solution[b].q == 1:
-                    combination_integer = True
-            except:
-                pass
+            combination_integer = check_integer_solution_of_equation(linear_equation)
 
             if combination_integer:
                 spanning_set = old_vectors
@@ -69,12 +63,18 @@ def reduce_spanning_set_3d(old_vectors, new_vector):
             spanning_set = old_vectors + [new_vector]
     
     elif len(old_vectors) == 3:
-        coefficients = common_superlattice_3d(sp.Matrix(old_vectors[0]), 
-                                              sp.Matrix(old_vectors[1]), 
-                                              sp.Matrix(old_vectors[2]),
-                                              sp.Matrix(new_vector))
-      
-        spanning_set = build_spanning_set(coefficients, old_vectors, new_vector)
+        linear_equation = old_vectors[0]*a + old_vectors[1]*b + old_vectors[2]*c - new_vector
+        combination_integer = check_integer_solution_of_equation(linear_equation)
+
+        if combination_integer:
+            spanning_set = old_vectors
+        else:
+            coefficients = common_superlattice_3d(sp.Matrix(old_vectors[0]), 
+                                                  sp.Matrix(old_vectors[1]), 
+                                                  sp.Matrix(old_vectors[2]),
+                                                  sp.Matrix(new_vector))
+
+            spanning_set = build_spanning_set(coefficients, old_vectors, new_vector)
                 
     else:
         raise ValueError("Too many vectors in list of previous spanning set (old_vectors).")
@@ -93,6 +93,17 @@ def build_spanning_set(coefficients, old_vectors, new_vector):
             vector = vector + coefficients[i][j]*old_vectors[j]
         spanning_set.append(vector)
     return spanning_set
+
+
+def check_integer_solution_of_equation(linear_equation):
+    solution = solve(linear_equation, a, b, c)
+    combination_integer = True
+    try:
+        for var in solution:
+            combination_integer = combination_integer and (solution[var] == 1)
+    except:
+        combination_integer = False
+    return combination_integer
 
 
 
