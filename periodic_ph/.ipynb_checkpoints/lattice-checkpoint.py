@@ -114,7 +114,7 @@ def common_superlattice_1d(vector0, vector1):
     """
     
     # look for a non-zero coordinate
-    index = nonzero_entry(vector0)
+    index = np.array(vector0).argmax()
     
     # take least common denominator of the index'th entries
     lcd = lcd_matrix(sp.Matrix([vector0[index], vector1[index]]))
@@ -125,12 +125,6 @@ def common_superlattice_1d(vector0, vector1):
     return [x, y]
 
     
-
-def nonzero_entry(vector):
-    for count, value in enumerate(vector):
-        if value != 0:
-            return count
-    return 0 # in case the vector is the zero vector
 
 def lcd_matrix(M):
     """
