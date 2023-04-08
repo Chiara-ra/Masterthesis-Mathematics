@@ -114,7 +114,7 @@ def common_superlattice_1d(vector0, vector1):
     """
     
     # look for a non-zero coordinate
-    index = np.array(vector0).argmax()
+    index = np.abs(np.array(vector0)).argmax()
     
     # take least common denominator of the index'th entries
     lcd = lcd_matrix(sp.Matrix([vector0[index], vector1[index]]))
@@ -177,12 +177,12 @@ def common_superlattice_2d(vector0, vector1, new_vector):
         new_vector = skip_coordinate(new_vector, index)
     
     basis_matrix = sp.Matrix([vector0.T,vector1.T]).T
-    primitive, primitive_coeff_basis, primitive_coeff_new_vector = find_parallel_primitive(basis_matrix, new_vector)
+    primitive, primitive_coeff = find_parallel_primitive(basis_matrix, new_vector)
     
     # project basis_matrix to v_orth
     projected_basis = orthogonal_projection(basis_matrix, primitive)
     [x, y] = common_superlattice_1d(projected_basis[:,0], projected_basis[:,1])
-    return [x, y, 0], list(primitive_coeff_basis) + [primitive_coeff_new_vector]
+    return [x, y, 0], primitive_coeff
 
     
 def skip_coordinate(vector, n):
@@ -198,6 +198,9 @@ def skip_coordinate(vector, n):
         new_vector = [vector[0],vector[1]]
     
     return sp.Matrix(new_vector)
+
+ 
+
 
 
 
@@ -218,49 +221,38 @@ def gcd3(a,b,c):
     return gcd(gcd(a,b),c)
 
 
-def find_parallel_primitive(basis, u):
+def find_parallel_primitive(basis, new_vector):
     """
-    Takes a basis of integer sympy vectors and an additional sympy vector u
-    Outputs the primitive v in the lattice parallel to u and its coefficients in the basis and u.
+    Takes a basis of integer sympy vectors and an additional sympy vector new_vector
+    Outputs the primitive v in the lattice parallel to new_vector and its coefficients in the basis and new_vector.
     """
     # based on lemma 3.1
     G = basis
     #Gi = G**(-1)
     Gi = G.inv()
-    denom_list = []
-    p = 1
-    for entry in Gi:
-        if entry.q not in denom_list:
-            denom_list.append(entry.q)
-            p *= entry.q
+    p = lcd_matrix(Gi)
     
-    up = p*Gi*u
-    v = G*up
-    if len(u)==3:
-        v = v / gcd3(up[0],up[1],up[2])
-        coeff = up / gcd3(up[0],up[1],up[2]) #dividng by gcd of coefficients gives us the shortest parallel vector in the span of the original basis
-    if len(u)==2:
-        v = v / gcd(up[0],up[1])
-        coeff = up / gcd(up[0],up[1])
+    parallel_vector_coeff = p*Gi*new_vector
+    v = G*parallel_vector_coeff
     
-    # to find shortest vector in the span of the new basis (four vectors), 
-    # we find out the ratios of the two vectors 
-    # get them to integer by multiplying with denominators
-    # calculate the gcd of the resulting numbers
-    # then divide the gcd (or the vector associated to it) by the denominator again
-    for i in range(len(u)):
-        if u[i]!=0:
-            num1 = v[i]
-            num2 = u[i]
-            denom = num1.q*num2.q
-            a, b = gcdExtended(num1*denom, num2*denom)
-            new_gcd = int(a*num1*denom + b*num2*denom)
-            v = v/num1*new_gcd
-            coeff = coeff * a
-            u_coeff = b
-            break
+    if len(new_vector)==3:
+        gcd_vec = gcd3(parallel_vector_coeff[0],
+                       parallel_vector_coeff[1],
+                       parallel_vector_coeff[2])
+    if len(new_vector)==2:
+        gcd_vec = gcd(parallel_vector_coeff[0],
+                      parallel_vector_coeff[1])
     
-    return v, coeff, u_coeff
+    primitive_wrt_basis_coeff = parallel_vector_coeff / gcd_vec
+    primitive_wrt_basis =  G*primitive_wrt_basis_coeff
+    # dividng by gcd of coefficients gives shortest parallel vector in span of original basis
+    
+    [x, y] = common_superlattice_1d(primitive_wrt_basis, new_vector)
+    primitive_suplat = x*primitive_wrt_basis + y*new_vector
+    primitive_suplat_coeff_basis = primitive_wrt_basis_coeff*x
+    primitive_suplat_coeff_new_vector = y
+    
+    return primitive_suplat, list(primitive_suplat_coeff_basis) + [primitive_suplat_coeff_new_vector]
 
 # -----------------------------------------------------
 
@@ -274,12 +266,12 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
     the common superlattice of all four vectors. 
     """
     basis_matrix = sp.Matrix([vector0.T, vector1.T, vector2.T]).T
-    primitive, primitive_coeff_basis, primitive_coeff_new_vector = find_parallel_primitive(basis_matrix, new_vector)
+    primitive, primitive_coeff = find_parallel_primitive(basis_matrix, new_vector)
     projected_vectors = orthogonal_projection(basis_matrix, new_vector)
     
     basis0_coeff = [0,0,0,0]
     basis1_coeff = [0,0,0,0]
-    basis2_coeff =  list(primitive_coeff_basis) + [primitive_coeff_new_vector]
+    basis2_coeff = primitive_coeff
     
     primitive_parallel_to_basis = False
     for i in range(3):
@@ -289,10 +281,13 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
             primitive_parallel_to_basis = True
             
     if not primitive_parallel_to_basis:
-        # reduce to 2 component vectors and get new basis and new "new vector"
-        vector0_2d, vector1_2d, new_vector_2d, re_index = setup_2d_induction(projected_vectors, new_vector)
+        re_index = reorder_vectors_for_induction(projected_vectors)
+        lcd_projected_vectors = lcd_matrix(projected_vectors)
         
-        basis0_coeff_induct, basis1_coeff_induct = common_superlattice_2d(vector0_2d, vector1_2d, new_vector_2d)
+        basis0_coeff_induct, basis1_coeff_induct = common_superlattice_2d(
+            projected_vectors[:,re_index[0]]*lcd_projected_vectors, 
+            projected_vectors[:,re_index[1]]*lcd_projected_vectors, 
+            projected_vectors[:,re_index[2]]*lcd_projected_vectors)
         
         for i in range(3):
             basis0_coeff[re_index[i]] = basis0_coeff_induct[i]
@@ -302,58 +297,22 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
     return basis0_coeff, basis1_coeff, basis2_coeff
     
     
+   
     
-def skip_coord(vector,n=1):
-    """
-    Takes in 3-component vector and returns corresponding 2-component vector
-    given by removing the nth coordinate (n = 0,1,2).
-    """
-    if n == 0:
-        new_vector = [vector[1],vector[2]]
-    elif n == 1:
-        new_vector = [vector[0],vector[2]]
-    elif n == 2:
-        new_vector = [vector[0],vector[1]]
-    
-    return sp.Matrix(new_vector)
-
-
-def skip_correct_coord(matrix, skipping_direction):
-    ind = np.argmax(np.abs(skipping_direction))
-    column1_skipped = skip_coord(matrix[:,0],ind)
-    column2_skipped = skip_coord(matrix[:,1],ind)
-    column3_skipped = skip_coord(matrix[:,2],ind)
-    
-    return sp.Matrix([column1_skipped[:], column2_skipped[:], column3_skipped[:]]).T
-
-    
-def setup_2d_induction(projected_vectors, normal_vector):
+def reorder_vectors_for_induction(projected_vectors):#, normal_vector):
     """
     Takes 3x3 sympy matrix with vectors projected to orthogonal complement of u.
     Skips one coordinate and shuffles vectors to be in the setup "basis + additional vector".
     Returns skipped vectors and shuffle dictionary. 
     """
-    reduced_vectors = skip_correct_coord(projected_vectors, normal_vector)
-    
     # search for vector to make new "extra"
-    for i in range(3): #this just remember the variable "i"
-        indices = [(i+1)%3,(i+2)%3]
-        if reduced_vectors[:, indices].det() != 0:
-            true_i=i
+    for i in range(3):
+        if projected_vectors[:,(i+1)%3].cross(projected_vectors[:,(i+2)%3]).norm() != 0:
+            true_i = i
             break
-        
-        elif i==2: # this is outside of range, meaning no subset is basis
-            raise ValueError("No linearly independant subset found in set of projected vectors.")
-    
-    # determine lcm of denomiators
-    lcm_denom = lcd_matrix(reduced_vectors)
-    
-    re_index = {0: indices[0], 1: indices[1], 2: true_i}
-    
-    vector0    = reduced_vectors[:,re_index[0]]*lcm_denom
-    vector1    = reduced_vectors[:,re_index[1]]*lcm_denom  
-    new_vector = reduced_vectors[:,re_index[2]]*lcm_denom
-                             
-    return vector0, vector1, new_vector, re_index
-
+        elif i==2: 
+            raise ValueError("No linearly independent subset found in set of projected vectors.")
+ 
+    re_index = {0: (true_i+1)%3, 1: (true_i+2)%3, 2: true_i}
+    return re_index
 
