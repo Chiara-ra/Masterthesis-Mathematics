@@ -169,12 +169,12 @@ def common_superlattice_2d(vector0, vector1, new_vector):
     Calculates coefficients of the integer basis spanning 
     the common superlattice of all three vectors. 
     """
-    if len(new_vector) == 3:
-        # skip one coordinate
-        index  = np.argmax(np.abs(vector0.cross(vector1)))
-        vector0 =    skip_coordinate(vector0, index)
-        vector1 =    skip_coordinate(vector1, index)
-        new_vector = skip_coordinate(new_vector, index)
+    
+    # skip one coordinate
+    index  = np.argmax(np.abs(vector0.cross(vector1)))
+    vector0 =    skip_coordinate(vector0, index)
+    vector1 =    skip_coordinate(vector1, index)
+    new_vector = skip_coordinate(new_vector, index)
     
     basis_matrix = sp.Matrix([vector0.T,vector1.T]).T
     primitive, primitive_coeff = find_parallel_primitive(basis_matrix, new_vector)
@@ -299,11 +299,11 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
     
    
     
-def reorder_vectors_for_induction(projected_vectors):#, normal_vector):
+def reorder_vectors_for_induction(projected_vectors):
     """
-    Takes 3x3 sympy matrix with vectors projected to orthogonal complement of u.
-    Skips one coordinate and shuffles vectors to be in the setup "basis + additional vector".
-    Returns skipped vectors and shuffle dictionary. 
+    Takes 3x3 sympy matrix whose columns are rational vectors and span a plane. 
+    Outputs a dictionary re_index which orders the columns such that the first two
+    are guaranteed to be linearly independent. 
     """
     # search for vector to make new "extra"
     for i in range(3):

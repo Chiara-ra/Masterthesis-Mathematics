@@ -6,7 +6,7 @@ from .lattice import reduce_spanning_set_3d as rss3
 
 # Calculating the evolution of $\Lambda_0$
 
-## Auxiliary functions for Lambda_0_evolution()
+## Auxiliary functions for copy_monomial_events()
 
 def vol_0d():
     return 1
@@ -197,11 +197,11 @@ class PairAddition:
 
 
             
-## The final Lambda_0_evolution()
+## The final copy_monomial_events()
 
     
     
-def Lambda_0_evolution(filt_len, N, persistence_pairs, trafo_matrix):
+def copy_monomial_events(filt_len, N, persistence_pairs, trafo_matrix):
     """
     Takes filtration data (filt_len length of torus filtration, N number of initial vertices, 
     persistence_pairs and trafo_matrix dependent on initial cell) and returns Lambda0_list,

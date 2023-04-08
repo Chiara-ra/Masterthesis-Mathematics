@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import sympy as sp
 from copy import deepcopy
-from .. import lambda0 
+from .. import copy_monomial 
 
 
 # Creating Merge Tree
@@ -64,15 +64,15 @@ def colour_lookup():
 
         
 def extract_mergers_from_branch(branch):
-    return [event for event in branch if isinstance(event, lambda0.Merger)]
+    return [event for event in branch if isinstance(event, copy_monomial.Merger)]
 
 def extract_sublattice_changes_from_branch(branch):
-    return [event for event in branch if isinstance(event, lambda0.MonomialChange)]
+    return [event for event in branch if isinstance(event, copy_monomial.MonomialChange)]
  
 def extract_mergers_global(data):
     mergers = [extract_mergers_from_branch(branch) for branch in data]
     last_event_time = mergers[0][-1].time_index
-    mergers[0].append(lambda0.Merger(last_event_time + 2, 0, 0, None, None, None, None))
+    mergers[0].append(copy_monomial.Merger(last_event_time + 2, 0, 0, None, None, None, None))
     return mergers
 
 def extract_sublattice_changes_global(data):
@@ -121,7 +121,7 @@ def plot_branch(component, ax, merge_data, data, order, continuous):
         
         # annotations
         if ((event.det_rel != det_rel) or (event.dim != dim) 
-            and isinstance(event, lambda0.MonomialChange)):
+            and isinstance(event, copy_monomial.MonomialChange)):
             event_time   = conditional_int2cont(event.time_index, continuous)
             # tick
             ax.plot([x1+tick_setoff, x1+tick_setoff+tick_length], [event_time, event_time], "black")

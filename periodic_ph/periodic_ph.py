@@ -2,7 +2,7 @@
 import numpy as np
 from . import torus_alpha_complex as tac
 from . import torus_ph as tph
-from . import lambda0 
+from . import copy_monomial
 from .plotting import merge_tree
 from .utils.preprocess_points import preprocess_points
 
@@ -35,7 +35,7 @@ class PeriodicPersistence:
         self.N = len(simplex_objects[0])
         self.int2cont = tac.int2cont(torus_filtration)
         self.groups, self.pairs = tph.PH(torus_filtration, simplex_objects)
-        self.copy_monomial_events = lambda0.Lambda_0_evolution(len(torus_filtration), self.N, self.pairs, self.trafo_matrix);
+        self.copy_monomial_events = copy_monomial.copy_monomial_events(len(torus_filtration), self.N, self.pairs, self.trafo_matrix);
 
         
     def describe_evolution(self):
@@ -51,7 +51,7 @@ class PeriodicPersistence:
         
         for i in range(len(self.copy_monomial_events[comp])):
             state = self.copy_monomial_events[comp][i]
-            if isinstance(state, lambda0.MonomialChange):
+            if isinstance(state, copy_monomial.MonomialChange):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
 dimension = {state.dim}
@@ -60,7 +60,7 @@ det. ratio  = {float(state.det_rel):2.2f}
 basis = \n{state.basis_matrix}
                 """)
                 
-            elif isinstance(state, lambda0.Merger):
+            elif isinstance(state, copy_monomial.Merger):
                 print(f"""
 {bold0}Timestep {state.time_index} ({self.int2cont[state.time_index]:2.4f}){bold1}
 Component {state.old_component} merged to component {state.new_component}.
