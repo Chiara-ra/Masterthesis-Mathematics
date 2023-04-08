@@ -1,0 +1,8 @@
+Python Version:
+3.7.6 (default, Jan  8 2020, 13:42:34) 
+
+External Modules used:
+sympy 1.8
+numpy 1.20.3
+matplotlib 3.4.2
+gudhi 3.1.1
