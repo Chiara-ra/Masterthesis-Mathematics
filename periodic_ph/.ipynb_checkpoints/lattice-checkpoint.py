@@ -220,7 +220,8 @@ def find_parallel_primitive(basis, u):
     """
     # based on lemma 3.1
     G = basis
-    Gi = G**(-1)
+    #Gi = G**(-1)
+    Gi = G.inv()
     denom_list = []
     p = 1
     for entry in Gi:
@@ -288,15 +289,10 @@ def common_superlattice_3d(vector0, vector1, vector2, new_vector):
         
         basis0_coeff_induct, basis1_coeff_induct = common_superlattice_2d(vector0_2d, vector1_2d, new_vector_2d)
         
-        basis0_coeff[re_index[0]] = basis0_coeff_induct[0]
-        basis0_coeff[re_index[1]] = basis0_coeff_induct[1]
-        basis0_coeff[re_index[2]] = basis0_coeff_induct[2]
-        # new_vector component stays 0
-        
-        basis1_coeff[re_index[0]] = basis1_coeff_induct[0]
-        basis1_coeff[re_index[1]] = basis1_coeff_induct[1]
-        basis1_coeff[re_index[2]] = basis1_coeff_induct[2]
-        # new_vector component stays 0 
+        for i in range(3):
+            basis0_coeff[re_index[i]] = basis0_coeff_induct[i]
+            basis1_coeff[re_index[i]] = basis1_coeff_induct[i]
+            # new_vector component stays 0 
 
     return basis0_coeff, basis1_coeff, basis2_coeff
     
@@ -317,7 +313,7 @@ def skip_coord(vector,n=1):
     return sp.Matrix(new_vector)
 
 
-def skip_corr_coord(matrix, skipping_direction):
+def skip_correct_coord(matrix, skipping_direction):
     ind = np.argmax(np.abs(skipping_direction))
     column1_skipped = skip_coord(matrix[:,0],ind)
     column2_skipped = skip_coord(matrix[:,1],ind)
@@ -332,7 +328,7 @@ def setup_2d_induction(projected_vectors, normal_vector):
     Skips one coordinate and shuffles vectors to be in the setup "basis + additional vector".
     Returns skipped vectors and shuffle dictionary. 
     """
-    reduced_vectors = skip_corr_coord(projected_vectors, normal_vector)
+    reduced_vectors = skip_correct_coord(projected_vectors, normal_vector)
     
     # search for vector to make new "extra"
     for i in range(3): #this just remember the variable "i"
