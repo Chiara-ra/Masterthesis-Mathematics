@@ -187,4 +187,4 @@ def plot_mergetree(data, continuous = None, width=5, height=7):
     for component in range(N):
         plot_branch(component, ax, merge_data, data, order, continuous)
         
-
+    plt.show()

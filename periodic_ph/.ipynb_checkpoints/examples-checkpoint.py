@@ -50,7 +50,7 @@ def knot_3D(p: int, q: int, l: int, res = 20):
     spacing = np.linspace(0,1,res,endpoint=False)
     x = np.mod(q*spacing, 1)
     y = np.mod(p*spacing, 1)
-    y = np.mod(l*spacing, 1)
+    z = np.mod(l*spacing, 1)
             
     return np.array([x,y,z]).transpose()
 
