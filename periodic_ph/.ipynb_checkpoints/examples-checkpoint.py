@@ -2,6 +2,7 @@
 import numpy as np
 import random as rd
 
+
 # This file contains examples for calculating torus persistence /
 # proof of concept PPH computations
 
@@ -39,6 +40,22 @@ def torus_knot(p: int, q: int, dim: int, res = 20):
             a = np.array([x,y,z]).transpose()
             
     return a
+
+
+def knot_3D(p: int, q: int, l: int, res = 20):
+    r""" Points lying along diagonal line with resolution 20. 
+    Depending on projection a (p,q)-knot, (p,l)-knot or (q,l)-knot.
+    """
+               
+    if (not isinstance(dim, int)) or (dim not in [2,3]):
+        raise ValueError(f"dim needs to be integer 2 or 3, but is {dim}.")
+    else:
+        spacing = np.linspace(0,1,res,endpoint=False)
+        x = np.mod(q*spacing, 1)
+        y = np.mod(p*spacing, 1)
+        y = np.mod(l*spacing, 1)
+            
+    return np.array([x,y,z]).transpose()
 
 
 

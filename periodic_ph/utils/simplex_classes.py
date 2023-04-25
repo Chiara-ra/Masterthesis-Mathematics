@@ -91,7 +91,7 @@ class Persistence_Pair:
         self.lifespan_cont  = None
         self.rep       = None # list of Simplex-objects whose sum gives representative
         self.component = None # we first have to call self.calc_cc
-        #self.cv         = None # we first have to call self.calc_cc
+        self.cv         = None # we first have to call self.calc_cc
     
 
     def int2cont_interval(self, torus_filtration):
@@ -158,23 +158,23 @@ class Persistence_Pair:
         
         edge = self.rep[0] # Simplex1D object
         V += edge.cv       # add crossing vector of edge to V
-        end_vert = edge.vert1
+        latest_vertex = edge.vert1
         pp_red = self.rep[1:]
 
         while len(pp_red) != 0:
-            # look for correct representative that has end_vert as one of its vertices
+            # look for correct representative that has latest_vertex as one of its vertices
             for i in range(len(pp_red)):
                 edge = pp_red[i]
 
                 # check if we are looking at the correct edge
-                if end_vert in edge.ord_verts:
+                if latest_vertex in edge.ord_verts:
                     # check if orientations are lining up or not
-                    if end_vert == edge.ord_verts[0]:
+                    if latest_vertex == edge.ord_verts[0]:
                         ori = +1
-                        end_vert = edge.vert1
+                        latest_vertex = edge.vert1
                     else:
                         ori = -1
-                        end_vert = edge.vert0
+                        latest_vertex = edge.vert0
 
                     V += ori * edge.cv
                     pp_red.pop(i)
